@@ -1,5 +1,5 @@
 import { Add } from '@mui/icons-material';
-import { Button, Paper } from '@mui/material';
+import { Button, Paper, Typography } from '@mui/material';
 import { DataGrid, GridToolbarContainer } from '@mui/x-data-grid';
 import React from 'react';
 
@@ -36,6 +36,7 @@ export default function Operations() {
 
     return (
         <Paper sx={{ p: 2 }}>
+            <Typography fontWeight={'bold'} gutterBottom>Operations</Typography>
             <DataGrid
                 style={{ minHeight: '68vh', border: 'none' }}
                 rows={rows}
@@ -170,7 +171,8 @@ const rows = [
         ShippingInstructionNumber: '123091823',
         Remark: 'to be delivered as fast',
         UserID: '1231',
-    }), createRow({
+    }),
+    createRow({
         id: 338,
         operationNumber: '312',
         CustomerID: '453',
@@ -183,7 +185,8 @@ const rows = [
         ShippingInstructionNumber: '123091823',
         Remark: 'to be delivered as fast',
         UserID: '1231',
-    }), createRow({
+    }),
+    createRow({
         id: 339,
         operationNumber: '312',
         CustomerID: '453',
@@ -197,5 +200,4 @@ const rows = [
         Remark: 'to be delivered as fast',
         UserID: '1231',
     })
-
 ]

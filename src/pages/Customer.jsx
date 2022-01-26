@@ -128,7 +128,7 @@ export default function Customer() {
             <Dialog onClose={handleClose} open={open}>
                 <DialogTitle>Add A New Customer</DialogTitle>
                 <Box component="form" noValidate onSubmit={handleSubmit} sx={{ px: 3, pb: 3 }}>
-                    <Grid container spacing={2}>
+                    <Grid container spacing={1}>
                         <Grid item xs={6}>
                             <TextField
                                 margin="normal"
