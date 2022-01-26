@@ -1,5 +1,5 @@
 import * as React from "react";
-import { ThemeProvider, createTheme, PaletteMode } from "@mui/material";
+import { ThemeProvider, createTheme } from "@mui/material";
 import { createContext } from "react";
 
 const DyanmicTheme = createContext({
@@ -7,7 +7,7 @@ const DyanmicTheme = createContext({
 });
 
 export const ThemeContext = ({ children }) => {
-  const [mode, setMode] = React.useState<PaletteMode>("light");
+  const [mode, setMode] = React.useState("light");
 
   const themeMode = React.useMemo(
     () => ({

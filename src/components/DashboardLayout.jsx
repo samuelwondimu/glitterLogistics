@@ -1,5 +1,7 @@
 import * as React from 'react';
-import { styled, useTheme } from '@mui/material/styles';
+import { styled } from '@mui/material/styles';
+import Brightness4Icon from "@mui/icons-material/Brightness4";
+import Brightness7Icon from "@mui/icons-material/Brightness7";
 import Box from '@mui/material/Box';
 import MuiDrawer from '@mui/material/Drawer';
 import MuiAppBar from '@mui/material/AppBar';
@@ -15,9 +17,10 @@ import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import { Link, Outlet } from 'react-router-dom';
 import { navList } from './navList';
-import { Avatar, Button, Menu, MenuItem, Tooltip } from '@mui/material';
+import { Avatar, Button, Menu, MenuItem, Tooltip, useTheme } from '@mui/material';
 import { useAuth } from '../App';
 import { LogoutOutlined } from '@mui/icons-material';
+import { useToggleTheme } from '../theme/useTheme';
 
 const drawerWidth = 240;
 
@@ -103,6 +106,8 @@ const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' 
 
 export default function DashboardLayout() {
     let auth = useAuth();
+    const theme = useTheme();
+    const changeTheme = useToggleTheme();
     const [open, setOpen] = React.useState(true);
     const [anchorElUser, setAnchorElUser] = React.useState(null);
 
@@ -117,7 +122,7 @@ export default function DashboardLayout() {
     return (
         <Box sx={{ display: 'flex' }}>
             <CssBaseline />
-            <AppBar position="fixed" open={open} elevation={0} sx={{ backgroundColor: '#4156cc' }}>
+            <AppBar position="fixed" open={open} elevation={0}>
                 <Toolbar>
                     <IconButton
                         color="inherit"
@@ -169,6 +174,17 @@ export default function DashboardLayout() {
 
                             </Box>
                         </Menu>
+                        <IconButton
+                            sx={{ ml: 1 }}
+                            onClick={changeTheme.toggleColorMode}
+                            color="inherit"
+                        >
+                            {theme.palette.mode === "dark" ? (
+                                <Brightness7Icon />
+                            ) : (
+                                <Brightness4Icon />
+                            )}
+                        </IconButton>
                     </Box>
                 </Toolbar>
             </AppBar>

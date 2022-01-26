@@ -10,15 +10,17 @@ import Invoice from './pages/Invoice';
 import Operations from './pages/Operations';
 import { fakeAuthProvider } from './auth';
 import React from 'react';
+import { ThemeContext } from './theme/useTheme';
 
 
 
 export default function App() {
   return <>
-    <AuthProvider>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Login />} />
+    <ThemeContext>
+      <AuthProvider>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<Login />} />
             <Route path="/dashboard" element={<RequireAuth><DashboardLayout /></RequireAuth>} >
               {/* dashboard components goes here */}
               <Route path='' element={<Dashboard />} />
@@ -29,9 +31,10 @@ export default function App() {
               <Route path='invoice' element={<Invoice />} />
               <Route path='operations' element={<Operations />} />
             </Route>
-        </Routes>
-      </BrowserRouter>
-    </AuthProvider>
+          </Routes>
+        </BrowserRouter>
+      </AuthProvider>
+    </ThemeContext>
   </>;
 }
 
