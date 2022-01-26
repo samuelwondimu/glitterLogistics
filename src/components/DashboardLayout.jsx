@@ -10,14 +10,14 @@ import Typography from '@mui/material/Typography';
 import Divider from '@mui/material/Divider';
 import IconButton from '@mui/material/IconButton';
 import MenuIcon from '@mui/icons-material/Menu';
-import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
-import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import ListItem from '@mui/material/ListItem';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import { Link, Outlet } from 'react-router-dom';
 import { navList } from './navList';
-import { Avatar, Menu, MenuItem, Tooltip } from '@mui/material';
+import { Avatar, Button, Menu, MenuItem, Tooltip } from '@mui/material';
+import { useAuth } from '../App';
+import { LogoutOutlined } from '@mui/icons-material';
 
 const drawerWidth = 240;
 
@@ -99,10 +99,10 @@ const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' 
     }),
 );
 
-const settings = ['Logout'];
 
 
 export default function DashboardLayout() {
+    let auth = useAuth();
     const [open, setOpen] = React.useState(true);
     const [anchorElUser, setAnchorElUser] = React.useState(null);
 
@@ -161,11 +161,12 @@ export default function DashboardLayout() {
                                     </Typography>
                                 </MenuItem>
                                 <Divider />
-                                {settings.map((setting) => (
-                                    <MenuItem key={setting} onClick={handleCloseUserMenu}>
-                                        <Typography textAlign="center">{setting}</Typography>
-                                    </MenuItem>
-                                ))}
+
+                                <MenuItem component={Button} onClick={() => { handleCloseUserMenu(); auth.signout() }} >
+                                    <LogoutOutlined sx={{ mr: 2 }} />
+                                    <Typography textAlign="center">{"Logout"}</Typography>
+                                </MenuItem>
+
                             </Box>
                         </Menu>
                     </Box>

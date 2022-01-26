@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { DataGrid, GridToolbarContainer } from '@mui/x-data-grid';
-import { Button, Paper, Typography } from '@mui/material';
+import { Box, Button, Dialog, DialogTitle, Grid, Paper, TextField, Typography } from '@mui/material';
 import { Add as AddIcon } from '@mui/icons-material';
 
 const columns = [
@@ -81,17 +81,35 @@ const rows = [
     { id: 9, lastName: 'Roxie', firstName: 'Harvey', age: 65 },
 ];
 
-function addCustomerToolBar() {
-    return (
-        <GridToolbarContainer>
-            <Button color="primary" startIcon={<AddIcon />} variant="contained">
-                Add Customer
-            </Button>
-        </GridToolbarContainer>
-    );
-}
 
 export default function Customer() {
+    const [open, setOpen] = useState(false);
+    const handleClickOpen = () => {
+        setOpen(true);
+    };
+    const handleClose = (value) => {
+        setOpen(false);
+    };
+
+    const handleSubmit = (event) => {
+        event.preventDefault();
+        const data = new FormData(event.currentTarget);
+        console.log(data)
+
+    };
+
+
+    function addCustomerToolBar() {
+
+        return (
+
+            <GridToolbarContainer>
+                <Button color="primary" startIcon={<AddIcon />} variant="contained" onClick={handleClickOpen}>
+                    Add Customer
+                </Button>
+            </GridToolbarContainer>
+        );
+    }
     return (
         <Paper sx={{ p: 2 }}>
             <Typography fontWeight={'bold'} gutterBottom>Customers</Typography>
@@ -106,6 +124,125 @@ export default function Customer() {
                 rowsPerPageOptions={[8]}
                 disableSelectionOnClick
             />
+
+            <Dialog onClose={handleClose} open={open}>
+                <DialogTitle>Add A New Customer</DialogTitle>
+                <Box component="form" noValidate onSubmit={handleSubmit} sx={{ px: 3, pb: 3 }}>
+                    <Grid container spacing={2}>
+                        <Grid item xs={6}>
+                            <TextField
+                                margin="normal"
+                                required
+                                fullWidth
+                                id="email"
+                                label="Customer Name"
+                                name="email"
+                                autoComplete="email"
+                                autoFocus
+                            />
+                        </Grid>
+                        <Grid item xs={6}>
+                            <TextField
+                                margin="normal"
+                                required
+                                fullWidth
+                                id="email"
+                                label="Customer Type"
+                                name="email"
+                                autoComplete="email"
+                                autoFocus
+                            />
+                        </Grid>
+                        <Grid item xs={12}>
+                            <TextField
+                                margin="normal"
+                                required
+                                fullWidth
+                                id="email"
+                                label="Address"
+                                name="email"
+                                autoComplete="email"
+                                autoFocus
+                            />
+                        </Grid>
+                        <Grid item xs={6}>
+                            <TextField
+                                margin="normal"
+                                required
+                                fullWidth
+                                id="email"
+                                label="Contact Person"
+                                name="email"
+                                autoComplete="email"
+                                autoFocus
+                            />
+                        </Grid>
+                        <Grid item xs={6}>
+                            <TextField
+                                margin="normal"
+                                required
+                                fullWidth
+                                id="email"
+                                label="Telephone 2"
+                                name="email"
+                                autoComplete="email"
+                                autoFocus
+                            />
+                        </Grid>
+                        <Grid item xs={6}>
+                            <TextField
+                                margin="normal"
+                                required
+                                fullWidth
+                                id="email"
+                                label="Telephone 2"
+                                name="email"
+                                autoComplete="email"
+                                autoFocus
+                            />
+                        </Grid>
+                        <Grid item xs={6}>
+                            <TextField
+                                margin="normal"
+                                required
+                                fullWidth
+                                id="email"
+                                label="mobile"
+                                name="email"
+                                autoComplete="email"
+                                autoFocus
+                            />
+                        </Grid>
+                        <Grid item xs={6}>
+                            <TextField
+                                margin="normal"
+                                required
+                                fullWidth
+                                id="email"
+                                label="VAT No"
+                                name="email"
+                                autoComplete="email"
+                                autoFocus
+                            />
+                        </Grid>
+                        <Grid item xs={6}>
+                            <TextField
+                                margin="normal"
+                                required
+                                fullWidth
+                                id="email"
+                                label="Tin No"
+                                name="email"
+                                autoComplete="email"
+                                autoFocus
+                            />
+                        </Grid>
+                        <Grid item xs={6}>
+                            <Button variant='contained'>Add Customer</Button>
+                        </Grid>
+                    </Grid>
+                </Box>
+            </Dialog>
         </Paper>
     );
 }

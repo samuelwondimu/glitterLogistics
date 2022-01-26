@@ -1,4 +1,4 @@
-import { Report } from '@mui/icons-material';
+import { Inventory2, PaidOutlined, PeopleAltOutlined, Report, Settings, SettingsAccessibility } from '@mui/icons-material';
 import { Box, Card, CardContent, CardMedia, Grid, Paper, Table, TableBody, TableCell, tableCellClasses, TableContainer, TableHead, TableRow, Typography } from '@mui/material';
 import { styled } from '@mui/material';
 import React from 'react';
@@ -29,23 +29,23 @@ export default function Dashboard() {
         {
             title: "Customers",
             data: "1,212",
-            icon: <Report />,
+            icon: <PeopleAltOutlined fontSize='large' />,
         },
         {
             title: "Expenses",
             data: "21,242",
-            icon: <Report />,
+            icon: <PaidOutlined fontSize='large' />,
         },
         {
             title: "Operations",
             data: "241,4423",
-            icon: <Report />,
+            icon: <Settings fontSize='large' />,
         },
 
         {
             title: "Commoditys",
             data: "2,124,124",
-            icon: <Report />,
+            icon: <Inventory2 fontSize='large' />,
         },
     ];
 
