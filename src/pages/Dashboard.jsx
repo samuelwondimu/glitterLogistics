@@ -1,4 +1,4 @@
-import { Delete, DoneAll, DoneOutline, Folder, Inventory2, PaidOutlined, PeopleAltOutlined, Report, Settings, SettingsAccessibility } from '@mui/icons-material';
+import { Delete, Done, DoneAll, DoneOutline, Folder, Inventory2, PaidOutlined, PeopleAltOutlined, Report, Settings, SettingsAccessibility } from '@mui/icons-material';
 import { Avatar, Box, Card, CardContent, CardMedia, FormControl, Grid, IconButton, InputLabel, List, ListItem, ListItemAvatar, ListItemText, MenuItem, Paper, Select, Stack, Table, TableBody, TableCell, tableCellClasses, TableContainer, TableHead, TableRow, Typography } from '@mui/material';
 import { styled } from '@mui/material';
 import React from 'react';
@@ -218,10 +218,10 @@ export default function Dashboard() {
                                 <ListItem
                                     secondaryAction={
                                         <>
-                                            <IconButton edge="end" aria-label="delete" sx={{mr: 1}}>
-                                                <DoneOutline />
+                                            <IconButton edge="end"  aria-label="delete" sx={{mr: 1}}>
+                                                <Done/>
                                             </IconButton>
-                                            <IconButton edge="end" aria-label="delete">
+                                            <IconButton edge="end"  aria-label="delete">
                                                 <Delete />
                                             </IconButton>
                                         </>
@@ -248,6 +248,22 @@ export default function Dashboard() {
 
 
 const todoList = [
+    {
+        title: 'submit invoice to hr manager',
+        subtitle: 'invoice starting from date 21 to 23 havent been submitted for a reivew by the hr manager complete this task before 21 may or else you are fired'
+    },
+    {
+        title: 'submit invoice to hr manager',
+        subtitle: 'invoice starting from date 21 to 23 havent been submitted for a reivew by the hr manager complete this task before 21 may or else you are fired'
+    },
+    {
+        title: 'submit invoice to hr manager',
+        subtitle: 'invoice starting from date 21 to 23 havent been submitted for a reivew by the hr manager complete this task before 21 may or else you are fired'
+    },
+    {
+        title: 'submit invoice to hr manager',
+        subtitle: 'invoice starting from date 21 to 23 havent been submitted for a reivew by the hr manager complete this task before 21 may or else you are fired'
+    },
     {
         title: 'submit invoice to hr manager',
         subtitle: 'invoice starting from date 21 to 23 havent been submitted for a reivew by the hr manager complete this task before 21 may or else you are fired'
