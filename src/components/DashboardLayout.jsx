@@ -15,6 +15,7 @@ import MenuIcon from '@mui/icons-material/Menu';
 import ListItem from '@mui/material/ListItem';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
+import { blueGrey } from '@mui/material/colors'
 import { Link, Outlet } from 'react-router-dom';
 import { navList } from './navList';
 import { Avatar, Button, Menu, MenuItem, Tooltip, useTheme } from '@mui/material';
@@ -63,6 +64,7 @@ const DrawerHeader = styled('div')(({ theme }) => ({
     alignItems: 'center',
     justifyContent: 'flex-end',
     padding: theme.spacing(0, 1),
+
     // necessary for content to be below app bar
     ...theme.mixins.toolbar,
 }));
@@ -89,7 +91,7 @@ const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' 
         width: drawerWidth,
         flexShrink: 0,
         whiteSpace: 'nowrap',
-        backgroundColor: "#333",
+        // background: "#333",
         boxSizing: 'border-box',
         ...(open && {
             ...openedMixin(theme),
@@ -190,8 +192,7 @@ export default function DashboardLayout() {
             </AppBar>
             <Drawer variant="permanent" open={open} PaperProps={{
                 sx: {
-                    // backgroundColor: "#4156cc",
-                    // color: "white",
+                    backgroundColor: theme.palette.mode === "dark" ? blueGrey[900] : blueGrey[50],
                 }
             }}>
                 <DrawerHeader>
@@ -209,7 +210,7 @@ export default function DashboardLayout() {
                 </List>
 
             </Drawer>
-            <Box component="main" sx={{ flexGrow: 1, p: 3, background: '#e2e2e2', minHeight: '100vh' }}>
+            <Box component="main" sx={{ flexGrow: 1, p: 3, backgroundColor: theme.palette.mode === "dark" ? blueGrey[400] : blueGrey[100], minHeight: '100vh' }}>
                 <DrawerHeader />
                 <Outlet />
                 <Box pt={3} />

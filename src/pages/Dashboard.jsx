@@ -1,5 +1,5 @@
-import { Inventory2, PaidOutlined, PeopleAltOutlined, Report, Settings, SettingsAccessibility } from '@mui/icons-material';
-import { Box, Card, CardContent, CardMedia, Grid, Paper, Table, TableBody, TableCell, tableCellClasses, TableContainer, TableHead, TableRow, Typography } from '@mui/material';
+import { Delete, DoneAll, DoneOutline, Folder, Inventory2, PaidOutlined, PeopleAltOutlined, Report, Settings, SettingsAccessibility } from '@mui/icons-material';
+import { Avatar, Box, Card, CardContent, CardMedia, FormControl, Grid, IconButton, InputLabel, List, ListItem, ListItemAvatar, ListItemText, MenuItem, Paper, Select, Stack, Table, TableBody, TableCell, tableCellClasses, TableContainer, TableHead, TableRow, Typography } from '@mui/material';
 import { styled } from '@mui/material';
 import React from 'react';
 
@@ -193,12 +193,71 @@ export default function Dashboard() {
             </Grid>
             <Grid item xs={12} sm={6} >
                 <Paper sx={{ p: 3 }}>
-                    <Typography gutterBottom variant="h6" component="h2">
-                        Todo List
-                    </Typography>
+                    <Stack direction='row' sx={{ justifyContent: 'space-between' }}>
+                        <Typography gutterBottom variant="h6" component="h2">
+                            Todo List
+                        </Typography>
+                        <FormControl sx={{ width: 2 / 4 }}>
+                            <InputLabel id="demo-simple-select-label">Sort</InputLabel>
+                            <Select
+                                labelId="demo-simple-select-label"
+                                id="demo-simple-select"
+                                // value={sort}
+                                label="TODO"
+                            // onChange={handleChange}
+                            >
+                                <MenuItem value={10}>Task</MenuItem>
+                                <MenuItem value={20}>Appointement</MenuItem>
+                                <MenuItem value={30}>Phone Call</MenuItem>
+                            </Select>
+                        </FormControl>
+                    </Stack>
+                    <List dense>
+                        {todoList.map((list) => {
+                            return (
+                                <ListItem
+                                    secondaryAction={
+                                        <>
+                                            <IconButton edge="end" aria-label="delete" sx={{mr: 1}}>
+                                                <DoneOutline />
+                                            </IconButton>
+                                            <IconButton edge="end" aria-label="delete">
+                                                <Delete />
+                                            </IconButton>
+                                        </>
+                                    }
+                                >
+                                    <ListItemAvatar>
+                                        <Avatar>
+                                            <Folder />
+                                        </Avatar>
+                                    </ListItemAvatar>
+                                    <ListItemText
+                                        primary={<Typography variant='h6'>{list.title}</Typography>}
+                                        secondary={<Typography variant='body1' color='GrayText'>{list.subtitle}</Typography>}
+                                    />
+                                </ListItem>
+                            )
+                        })}
+                    </List>
                 </Paper>
             </Grid>
-
         </Grid>
     </div>;
 }
+
+
+const todoList = [
+    {
+        title: 'submit invoice to hr manager',
+        subtitle: 'invoice starting from date 21 to 23 havent been submitted for a reivew by the hr manager complete this task before 21 may or else you are fired'
+    },
+    {
+        title: 'submit invoice to hr manager',
+        subtitle: 'invoice starting from date 21 to 23 havent been submitted for a reivew by the hr manager complete this task before 21 may or else you are fired'
+    },
+    {
+        title: 'submit invoice to hr manager',
+        subtitle: 'invoice starting from date 21 to 23 havent been submitted for a reivew by the hr manager complete this task before 21 may or else you are fired'
+    }
+]

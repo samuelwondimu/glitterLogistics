@@ -1,3 +1,4 @@
+import React from 'react';
 import { BrowserRouter, Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard'
@@ -9,10 +10,7 @@ import Port from './pages/Port';
 import Invoice from './pages/Invoice';
 import Operations from './pages/Operations';
 import { fakeAuthProvider } from './auth';
-import React from 'react';
 import { ThemeContext } from './theme/useTheme';
-
-
 
 export default function App() {
   return <>
@@ -22,7 +20,7 @@ export default function App() {
           <Routes>
             <Route path="/" element={<Login />} />
             <Route path="/dashboard" element={<RequireAuth><DashboardLayout /></RequireAuth>} >
-              {/* dashboard components goes here */}
+              {/* dashboard protected route components goes here */}
               <Route path='' element={<Dashboard />} />
               <Route path='commodity' element={<Commodity />} />
               <Route path='customers' element={<Customer />} />
@@ -63,8 +61,6 @@ function AuthProvider({ children }) {
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
-
-
 export function useAuth() {
   return React.useContext(AuthContext);
 }
@@ -72,11 +68,9 @@ export function useAuth() {
 function RequireAuth({ children }) {
   let auth = useAuth();
   let location = useLocation();
-
   if (!auth.user) {
     return <Navigate to="/" state={{ from: location }} replace />;
   }
-
   return children;
 }
 
