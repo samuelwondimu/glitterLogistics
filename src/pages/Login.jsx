@@ -1,6 +1,8 @@
 import * as React from 'react';
 import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
+import Brightness4Icon from "@mui/icons-material/Brightness4";
+import Brightness7Icon from "@mui/icons-material/Brightness7";
 import CssBaseline from '@mui/material/CssBaseline';
 import TextField from '@mui/material/TextField';
 import Link from '@mui/material/Link';
@@ -11,6 +13,8 @@ import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Typography from '@mui/material/Typography';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../App';
+import { IconButton, useTheme } from '@mui/material';
+import { useToggleTheme } from '../theme/useTheme';
 
 function Copyright(props) {
     return (
@@ -30,6 +34,9 @@ export default function SignInSide() {
     let navigate = useNavigate();
     let location = useLocation();
     let auth = useAuth();
+    const theme = useTheme();
+    const changeTheme = useToggleTheme();
+
 
     let from = location.state?.from?.pathname || '/dashboard';
 
@@ -47,6 +54,7 @@ export default function SignInSide() {
 
     return (
         <>
+
             <Grid container component="main" sx={{ height: '100vh' }}>
                 <CssBaseline />
                 <Grid
@@ -64,6 +72,17 @@ export default function SignInSide() {
                     }}
                 />
                 <Grid item xs={12} sm={8} md={5} component={Paper} elevation={6} square>
+                    <IconButton
+                        sx={{ ml: 1 }}
+                        onClick={changeTheme.toggleColorMode}
+                        color="inherit"
+                    >
+                        {theme.palette.mode === "dark" ? (
+                            <Brightness7Icon />
+                        ) : (
+                            <Brightness4Icon />
+                        )}
+                    </IconButton>
                     <Box
                         sx={{
                             my: 8,
