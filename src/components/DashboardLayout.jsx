@@ -18,7 +18,7 @@ import ListItemText from '@mui/material/ListItemText';
 import { blueGrey } from '@mui/material/colors'
 import { Link, Outlet } from 'react-router-dom';
 import { navList } from './navList';
-import { Avatar, Button, Menu, MenuItem, Tooltip, useTheme } from '@mui/material';
+import { Avatar, Button, Menu, MenuItem, Paper, Tooltip, useTheme } from '@mui/material';
 import { useAuth } from '../App';
 import { LogoutOutlined } from '@mui/icons-material';
 import { useToggleTheme } from '../theme/useTheme';
@@ -27,14 +27,16 @@ const drawerWidth = 240;
 
 function Copyright(props) {
     return (
-        <Typography variant="body2" color="text.secondary" align="center" {...props}>
+
+        <Typography variant="body1" color="text.secondary" align="center" {...props}>
             {'Copyright © '}
-            <a href="https://glitterlogstics.com/">
+            <a href="https://glitterlogstics.com/" style={{ color: 'inherit' }}>
                 Glitter Logistics and Trading PLC
             </a>{' '}
             {new Date().getFullYear()}
             {'.'}
         </Typography>
+
     );
 }
 
@@ -67,7 +69,7 @@ const DrawerHeader = styled('div')(({ theme }) => ({
 
     // necessary for content to be below app bar
     ...theme.mixins.toolbar,
-}));
+}))
 
 const AppBar = styled(MuiAppBar, {
     shouldForwardProp: (prop) => prop !== 'open',
@@ -138,6 +140,17 @@ export default function DashboardLayout() {
                         Glitter Logistics and Trading PLC
                     </Typography>
                     <Box sx={{ flexGrow: 0 }}>
+                        <IconButton
+                            sx={{ ml: 1 }}
+                            onClick={changeTheme.toggleColorMode}
+                            color="inherit"
+                        >
+                            {theme.palette.mode === "dark" ? (
+                                <Brightness7Icon />
+                            ) : (
+                                <Brightness4Icon />
+                            )}
+                        </IconButton>
                         <Tooltip title="Open settings">
                             <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
                                 <Avatar alt="Remy Sharp" src="/static/images/avatar/2.jpg" />
@@ -169,24 +182,13 @@ export default function DashboardLayout() {
                                 </MenuItem>
                                 <Divider />
 
-                                <MenuItem component={Button} onClick={() => { handleCloseUserMenu(); auth.signout() }} >
+                                <MenuItem component={Button} fullWidth onClick={() => { handleCloseUserMenu(); auth.signout() }} >
                                     <LogoutOutlined sx={{ mr: 2 }} />
-                                    <Typography textAlign="center">{"Logout"}</Typography>
+                                    <Typography textAlign="center" sx={{ textTransform: 'none' }}>Logout</Typography>
                                 </MenuItem>
 
                             </Box>
                         </Menu>
-                        <IconButton
-                            sx={{ ml: 1 }}
-                            onClick={changeTheme.toggleColorMode}
-                            color="inherit"
-                        >
-                            {theme.palette.mode === "dark" ? (
-                                <Brightness7Icon />
-                            ) : (
-                                <Brightness4Icon />
-                            )}
-                        </IconButton>
                     </Box>
                 </Toolbar>
             </AppBar>
@@ -210,7 +212,7 @@ export default function DashboardLayout() {
                 </List>
 
             </Drawer>
-            <Box component="main" sx={{ flexGrow: 1, p: 3, backgroundColor: theme.palette.mode === "dark" ? blueGrey[400] : blueGrey[100], minHeight: '100vh' }}>
+            <Box component="main" sx={{ flexGrow: 1, p: 3, backgroundColor: theme.palette.mode === "dark" ? blueGrey[800] : blueGrey[100], minHeight: '100vh' }}>
                 <DrawerHeader />
                 <Outlet />
                 <Box pt={3} />

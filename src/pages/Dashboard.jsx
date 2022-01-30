@@ -74,6 +74,7 @@ export default function Dashboard() {
                                 alignItems: "center",
                                 alignContent: "center",
                             }}
+                            elevation={0}
                         >
                             <CardContent>
                                 <Typography variant="h6">
@@ -93,7 +94,7 @@ export default function Dashboard() {
                 );
             })}
             <Grid item xs={12} sm={6} >
-                <Paper sx={{ p: 3 }}>
+                <Paper sx={{ p: 3 }} elevation={0}>
                     <Typography gutterBottom variant="h6" component="h2">
                         Operations
                     </Typography>
@@ -126,7 +127,7 @@ export default function Dashboard() {
                 </Paper>
             </Grid>
             <Grid item xs={12} sm={6} >
-                <Paper sx={{ p: 3 }}>
+                <Paper sx={{ p: 3 }} elevation={0}>
                     <Typography gutterBottom variant="h6" component="h2">
                         Customer
                     </Typography>
@@ -159,7 +160,7 @@ export default function Dashboard() {
                 </Paper>
             </Grid>
             <Grid item xs={12} sm={6} >
-                <Paper sx={{ p: 3 }}>
+                <Paper sx={{ p: 3 }} elevation={0}>
                     <Typography gutterBottom variant="h6" component="h2">
                         Service Provider
                     </Typography>
@@ -192,7 +193,7 @@ export default function Dashboard() {
                 </Paper>
             </Grid>
             <Grid item xs={12} sm={6} >
-                <Paper sx={{ p: 3 }}>
+                <Paper sx={{ p: 3 }} elevation={0}>
                     <Stack direction='row' sx={{ justifyContent: 'space-between' }}>
                         <Typography gutterBottom variant="h6" component="h2">
                             Todo List
@@ -218,10 +219,10 @@ export default function Dashboard() {
                                 <ListItem
                                     secondaryAction={
                                         <>
-                                            <IconButton edge="end"  aria-label="delete" sx={{mr: 1}}>
-                                                <Done/>
+                                            <IconButton edge="end" aria-label="delete" sx={{ mr: 1 }}>
+                                                <Done />
                                             </IconButton>
-                                            <IconButton edge="end"  aria-label="delete">
+                                            <IconButton edge="end" aria-label="delete">
                                                 <Delete />
                                             </IconButton>
                                         </>

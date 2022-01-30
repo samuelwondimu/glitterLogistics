@@ -44,7 +44,7 @@ const rows = [
 export default function Commodity() {
     return <>
         <Paper sx={{ p: 2 }}>
-            <Typography fontWeight={'bold'} gutterBottom>Commodity</Typography>
+           <Typography fontWeight={'bold'} gutterBottom>Commodity</Typography>
             <DataGrid
                 style={{ minHeight: '68vh', border: 'none' }}
                 rows={rows}
@@ -52,7 +52,7 @@ export default function Commodity() {
                 pageSize={12}
                 rowsPerPageOptions={[8]}
                 disableSelectionOnClick
-            />
+            /> 
         </Paper>
     </>;
 }
