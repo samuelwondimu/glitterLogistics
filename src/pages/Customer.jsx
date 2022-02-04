@@ -10,7 +10,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { Add as AddIcon } from "@mui/icons-material";
+import { Add as AddIcon, DeleteOutline } from "@mui/icons-material";
 
 const columns = [
   { field: "id", headerName: "ID", width: 90 },
@@ -51,13 +51,13 @@ const columns = [
   {
     field: "Mobile",
     headerName: "Mobile",
-    width: 150,
+    width: 100,
     editable: true,
   },
   {
     field: "VATNo",
     headerName: "VAT No",
-    width: 150,
+    width: 100,
   },
   {
     field: "Email",
@@ -70,22 +70,154 @@ const columns = [
     width: 150,
   },
   {
-    field: "UserID",
-    headerName: "User ID",
-    width: 150,
+    field: "createdAt",
+    headerName: "Actions",
+    width: 250,
+    renderCell: (params) => (
+      <>
+        <Button
+          variant="contained"
+          startIcon={<DeleteOutline />}
+          sx={{ mr: 1 }}
+          color="success"
+        >
+          Edit
+        </Button>
+        <Button variant="contained" startIcon={<DeleteOutline />} color="error">
+          Delete
+        </Button>
+      </>
+    ),
   },
 ];
 
 const rows = [
-  { id: 1, lastName: "Snow", firstName: "Jon", age: 35 },
-  { id: 2, lastName: "Lannister", firstName: "Cersei", age: 42 },
-  { id: 3, lastName: "Lannister", firstName: "Jaime", age: 45 },
-  { id: 4, lastName: "Stark", firstName: "Arya", age: 16 },
-  { id: 5, lastName: "Targaryen", firstName: "Daenerys", age: null },
-  { id: 6, lastName: "Melisandre", firstName: null, age: 150 },
-  { id: 7, lastName: "Clifford", firstName: "Ferrara", age: 44 },
-  { id: 8, lastName: "Frances", firstName: "Rossini", age: 36 },
-  { id: 9, lastName: "Roxie", firstName: "Harvey", age: 65 },
+  {
+    id: 1,
+    customerType: "manager",
+    ContactPerson: "ababeb",
+    Adress: "addis ababa bole",
+    Telephone: "345241481",
+    Mobile: "3123212412",
+    VATNo: "12413123",
+    Email: "glitter@gmail.com",
+    TINNo: "98240918043",
+    lastName: "Snow",
+    firstName: "Jon",
+    age: 35,
+  },
+  {
+    id: 2,
+    customerType: "manager",
+    ContactPerson: "ababeb",
+    Adress: "addis ababa bole",
+    Telephone: "345241481",
+    Mobile: "3123212412",
+    VATNo: "12413123",
+    Email: "glitter@gmail.com",
+    TINNo: "98240918043",
+    lastName: "Lannister",
+    firstName: "Cersei",
+    age: 42,
+  },
+  {
+    id: 3,
+    customerType: "manager",
+    ContactPerson: "ababeb",
+    Adress: "addis ababa bole",
+    Telephone: "345241481",
+    Mobile: "3123212412",
+    VATNo: "12413123",
+    Email: "glitter@gmail.com",
+    TINNo: "98240918043",
+    lastName: "Lannister",
+    firstName: "Jaime",
+    age: 45,
+  },
+  {
+    id: 4,
+    customerType: "manager",
+    ContactPerson: "ababeb",
+    Adress: "addis ababa bole",
+    Telephone: "345241481",
+    Mobile: "3123212412",
+    VATNo: "12413123",
+    Email: "glitter@gmail.com",
+    TINNo: "98240918043",
+    lastName: "Stark",
+    firstName: "Arya",
+    age: 16,
+  },
+  {
+    id: 5,
+    customerType: "manager",
+    ContactPerson: "ababeb",
+    Adress: "addis ababa bole",
+    Telephone: "345241481",
+    Mobile: "3123212412",
+    VATNo: "12413123",
+    Email: "glitter@gmail.com",
+    TINNo: "98240918043",
+    lastName: "Targaryen",
+    firstName: "Daenerys",
+    age: null,
+  },
+  {
+    id: 6,
+    customerType: "manager",
+    ContactPerson: "ababeb",
+    Adress: "addis ababa bole",
+    Telephone: "345241481",
+    Mobile: "3123212412",
+    VATNo: "12413123",
+    Email: "glitter@gmail.com",
+    TINNo: "98240918043",
+    lastName: "Melisandre",
+    firstName: null,
+    age: 150,
+  },
+  {
+    id: 7,
+    customerType: "manager",
+    ContactPerson: "ababeb",
+    Adress: "addis ababa bole",
+    Telephone: "345241481",
+    Mobile: "3123212412",
+    VATNo: "12413123",
+    Email: "glitter@gmail.com",
+    TINNo: "98240918043",
+    lastName: "Clifford",
+    firstName: "Ferrara",
+    age: 44,
+  },
+  {
+    id: 8,
+    customerType: "manager",
+    ContactPerson: "ababeb",
+    Adress: "addis ababa bole",
+    Telephone: "345241481",
+    Mobile: "3123212412",
+    VATNo: "12413123",
+    Email: "glitter@gmail.com",
+    TINNo: "98240918043",
+    lastName: "Frances",
+    firstName: "Rossini",
+    age: 36,
+  },
+  {
+    id: 9,
+    customerType: "manager",
+    ContactPerson: "ababeb",
+    Adress: "addis ababa bole",
+    Telephone: "345241481",
+    Mobile: "3123212412",
+    VATNo: "12413123",
+    Email: "glitter@gmail.com",
+    TINNo: "98240918043",
+    lastName: "Roxie",
+    firstName: "Harvey",
+    age: 65,
+  },
 ];
 
 export default function Customer() {
@@ -129,8 +261,6 @@ export default function Customer() {
         components={{
           Toolbar: addCustomerToolBar,
         }}
-        pageSize={7}
-        rowsPerPageOptions={[8]}
         disableSelectionOnClick
       />
 
