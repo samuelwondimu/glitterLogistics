@@ -7,6 +7,7 @@ import {
   Inventory2,
   PaidOutlined,
   PeopleAltOutlined,
+  Receipt,
   Report,
   Settings,
   SettingsAccessibility,
@@ -14,9 +15,12 @@ import {
 import {
   Avatar,
   Box,
+  Button,
   Card,
   CardContent,
   CardMedia,
+  Collapse,
+  Divider,
   FormControl,
   Grid,
   IconButton,
@@ -39,7 +43,11 @@ import {
   Typography,
 } from "@mui/material";
 import { styled } from "@mui/material";
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { getCurrenUser } from "../api/auth";
+import { getReports } from "../api/report";
+import { getTodos } from "../api/todo";
+import { useLocalStorage } from "../hooks/useLocalStorage";
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.head}`]: {
@@ -62,29 +70,62 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
 }));
 
 export default function Dashboard() {
+  const [user, setUser] = useState(null);
+  const [reports, setReports] = useState(null);
+  const [todos, setTodos] = useState(null);
+  const [expanded, setExpanded] = React.useState(false);
+
+  const handleExpandClick = () => {
+    setExpanded(!expanded);
+  };
+
   const topCardData = [
     {
+      title: "Operations",
+      data: reports?.Operation,
+      icon: <Settings fontSize="large" sx={{ background: 'orange', color: 'white', p: 0.5, borderRadius: 1 }} />,
+    },
+    {
       title: "Customers",
-      data: "1,212",
-      icon: <PeopleAltOutlined fontSize="large" />,
+      data: reports?.Customer,
+      icon: <PeopleAltOutlined fontSize="large" sx={{ background: 'orange', color: 'white', p: 0.5, borderRadius: 1 }} />,
+    },
+    {
+      title: 'Service Provider',
+      data: reports?.ServiceProvider,
+      icon: <SettingsAccessibility fontSize="large" sx={{ background: 'orange', color: 'white', p: 0.5, borderRadius: 1 }} />,
+    },
+    {
+      title: "Invoices",
+      data: reports?.Invoice,
+      icon: <Receipt fontSize="large" sx={{ background: 'orange', color: 'white', p: 0.5, borderRadius: 1 }} />
+    }
+
+
+  ];
+
+  const topcardCollapsed = [
+    {
+      title: "Ports",
+      data: reports?.Ports,
+      icon: <Folder fontSize="large" sx={{ background: 'orange', color: 'white', p: 0.5, borderRadius: 1 }} />,
     },
     {
       title: "Expenses",
-      data: "21,242",
-      icon: <PaidOutlined fontSize="large" />,
+      data: reports?.Expense,
+      icon: <PaidOutlined fontSize="large" sx={{ background: 'orange', color: 'white', p: 0.5, borderRadius: 1 }} />,
     },
-    {
-      title: "Operations",
-      data: "241,4423",
-      icon: <Settings fontSize="large" />,
-    },
-
     {
       title: "Commoditys",
-      data: "2,124,124",
-      icon: <Inventory2 fontSize="large" />,
+      data: reports?.Commodity,
+      icon: <Inventory2 fontSize="large" sx={{ background: 'orange', color: 'white', p: 0.5, borderRadius: 1 }} />,
     },
-  ];
+    {
+      title: "Cash Collection",
+      data: reports?.CashCollection,
+      icon: <Done fontSize="large" sx={{ background: 'orange', color: 'white', p: 0.5, borderRadius: 1 }} />,
+    },
+  ]
 
   function createData(name, calories, fat, carbs, protein) {
     return { name, calories, fat, carbs, protein };
@@ -97,34 +138,89 @@ export default function Dashboard() {
     createData("#4412412", 305, 3.7, 67, 4.3),
     createData("#5234232", 356, 16.0, 49, 3.9),
   ];
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    getCurrenUser(token).then((res) => {
+      setUser(res);
+    });
+
+    getReports(token).then((res) => {
+      console.log(res);
+      setReports(res[0]);
+    });
+
+    getTodos(token).then((res) => {
+      console.log(res);
+      setTodos(res);
+    });
+  }, [])
+
+  console.log("CURRENT USER", user);
+  console.log("REPORTS", reports);
+  console.log("TODOS", todos);
 
   return (
     <div>
       <Grid container spacing={3} justifyContent={"space-between"}>
-        {/* Top Card data */}
-        {topCardData.map((data) => {
-          return (
-            <Grid item xs={12} sm={3} key={data.title}>
-              <Card
-                sx={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  alignContent: "center",
-                }}
-                elevation={0}
-              >
-                <CardContent>
-                  <Typography variant="h6">{data.title}</Typography>
-                  <Typography variant="h4">{data.data}</Typography>
-                </CardContent>
-                <CardMedia>
-                  <Box mr={4}>{data.icon}</Box>
-                </CardMedia>
-              </Card>
-            </Grid>
-          );
-        })}
+        <Grid item md={12} container spacing={3}>
+          {/* Top Card data */}
+          {topCardData.map((data) => {
+            return (
+              <Grid item xs={12} sm={3} key={data.title}>
+                <Card
+                  sx={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    alignContent: "center",
+                  }}
+                  elevation={0}
+                >
+                  <CardContent>
+                    <Typography variant="h6">{data.title}</Typography>
+                    <Typography variant="h4">{data.data}</Typography>
+                  </CardContent>
+                  <CardMedia>
+                    <Box mr={4}>{data.icon}</Box>
+                  </CardMedia>
+                </Card>
+              </Grid>
+            );
+          })}
+
+          <Grid item md={12}>
+            <Collapse in={expanded} timeout="auto" unmountOnExit>
+              <Grid item md={12} container spacing={3}>
+                {topcardCollapsed.map((data) => {
+                  return (
+                    <Grid item xs={12} sm={3} key={data.title}>
+                      <Card
+                        sx={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                          alignItems: "center",
+                          alignContent: "center",
+                        }}
+                        elevation={0}
+                      >
+                        <CardContent>
+                          <Typography variant="h6">{data.title}</Typography>
+                          <Typography variant="h4">{data.data}</Typography>
+                        </CardContent>
+                        <CardMedia>
+                          <Box mr={4}>{data.icon}</Box>
+                        </CardMedia>
+                      </Card>
+                    </Grid>
+                  );
+                })}
+              </Grid>
+            </Collapse>
+          </Grid>
+          <Grid item xs={12} justifyContent='flex-end'>
+            <Button onClick={handleExpandClick} variant='contained'>{expanded ? 'close' : 'Show more'}</Button>
+          </Grid>
+        </Grid>
         <Grid item xs={12} sm={6}>
           <Paper sx={{ p: 3 }} elevation={0}>
             <Typography gutterBottom variant="h6" component="h2">
@@ -261,7 +357,7 @@ export default function Dashboard() {
                   id="demo-simple-select"
                   // value={sort}
                   label="TODO"
-                  // onChange={handleChange}
+                // onChange={handleChange}
                 >
                   <MenuItem value={10}>Task</MenuItem>
                   <MenuItem value={20}>Appointement</MenuItem>
@@ -270,47 +366,37 @@ export default function Dashboard() {
               </FormControl>
             </Stack>
             <List dense>
-              {todoList.map((list) => {
+              {todos.map((list, i) => {
                 return (
-                  <ListItem
-                    secondaryAction={
-                      <>
-                        <IconButton
-                          edge="end"
-                          aria-label="delete"
-                          sx={{
-                            mr: 1,
-                            backgroundColor: "green",
-                            color: "white",
-                          }}
-                        >
-                          <Done />
-                        </IconButton>
-                        <IconButton
-                          edge="end"
-                          aria-label="delete"
-                          sx={{ backgroundColor: "red", color: "white" }}
-                        >
-                          <Delete />
-                        </IconButton>
-                      </>
-                    }
-                  >
-                    <ListItemAvatar>
-                      <Avatar>
-                        <Folder />
-                      </Avatar>
-                    </ListItemAvatar>
+                  <ListItem key={i}>
                     <ListItemText
                       primary={
                         <Typography variant="h6">{list.title}</Typography>
                       }
-                      secondary={
-                        <Typography variant="body1" color="GrayText">
-                          {list.subtitle}
-                        </Typography>
-                      }
+                      secondary={list.subtitle.slice(0, 150)}
+                      sx={{ mr: -1 }}
                     />
+                    <ListItemAvatar>
+                      <IconButton
+                        edge="end"
+                        aria-label="delete"
+                        sx={{
+                          mr: 1,
+                          backgroundColor: "green",
+                          color: "white",
+                        }}
+                      >
+                        <Done />
+                      </IconButton>
+                      <IconButton
+                        edge="end"
+                        aria-label="delete"
+                        sx={{ backgroundColor: "red", color: "white" }}
+                      >
+                        <Delete />
+                      </IconButton>
+                    </ListItemAvatar>
+                    <Divider sx={{ my: 1 }} />
                   </ListItem>
                 );
               })}
