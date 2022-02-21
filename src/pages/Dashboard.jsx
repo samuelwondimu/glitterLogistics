@@ -366,14 +366,14 @@ export default function Dashboard() {
               </FormControl>
             </Stack>
             <List dense>
-              {todos.map((list, i) => {
+              {todos?.map((list, i) => {
                 return (
                   <ListItem key={i}>
                     <ListItemText
                       primary={
-                        <Typography variant="h6">{list.title}</Typography>
+                        <Typography variant="h6">{list.Subject}</Typography>
                       }
-                      secondary={list.subtitle.slice(0, 150)}
+                      secondary={list.Notes.slice(0, 150)}
                       sx={{ mr: -1 }}
                     />
                     <ListItemAvatar>
