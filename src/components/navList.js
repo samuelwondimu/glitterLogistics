@@ -5,7 +5,8 @@ import {
   People,
   Inventory2,
   Paid,
-  Receipt
+  Receipt,
+  PeopleAlt
 } from "@mui/icons-material";
 
 export const navList = [
@@ -44,4 +45,14 @@ export const navList = [
     path: "commodity",
     icon: <Inventory2 />,
   },
+  {
+    title: "Service Provider",
+    path: "service-provider",
+    icon: <Inventory2 />,
+  },
+  {
+    title: "Users",
+    path: "users",
+    icon: <PeopleAlt />,
+  }
 ];

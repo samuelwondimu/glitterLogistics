@@ -190,8 +190,7 @@ export default function DashboardLayout() {
                 <MenuItem>
                   <Avatar src={`R`} sx={{ mr: 1 }} />
                   <Typography color="GrayText">
-                    <b>glitter admin</b> <br />
-                    admin@glitter.com
+                    <b>{auth?.user?.username}</b> <br />
                   </Typography>
                 </MenuItem>
                 <Divider />

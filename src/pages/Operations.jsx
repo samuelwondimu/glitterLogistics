@@ -11,6 +11,8 @@ import {
 } from "@mui/material";
 import { DataGrid, GridToolbarContainer } from "@mui/x-data-grid";
 import React, { useState } from "react";
+import { useQuery } from "react-query";
+import Loading from '../components/Loading';
 
 function createRow(data) {
   return {
@@ -43,6 +45,18 @@ export default function Operations() {
     const data = new FormData(event.currentTarget);
     console.log(data);
   };
+
+
+  const { isLoading, error, data } = useQuery('repoData', () =>
+    fetch('http://localhost:5019/api/operation').then(res =>
+      res.json()
+    )
+  )
+
+  if (isLoading) return <Loading />
+
+  if (error) return 'An error has occurred: ' + error.message
+
   function addCustomerToolBar() {
     return (
       <GridToolbarContainer>

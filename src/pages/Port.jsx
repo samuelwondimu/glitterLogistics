@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Box,
   Button,
@@ -15,12 +15,16 @@ import {
   DeleteOutline,
   EditOutlined,
 } from "@mui/icons-material";
+import { useQuery } from "react-query";
+import Loading from "../components/Loading";
 
 export default function Port() {
   const [open, setOpen] = useState(false);
+  const [portData, setPortData] = useState([]);
   const handleClickOpen = () => {
     setOpen(true);
   };
+
   const handleClose = (value) => {
     setOpen(false);
   };
@@ -37,23 +41,13 @@ export default function Port() {
       width: 90,
     },
     {
-      field: "Port",
-      headerName: "Port",
-      width: 150,
-    },
-    {
-      field: "Country",
-      headerName: "Country",
-      width: 150,
-    },
-    {
       field: "PortName",
       headerName: "Port Name",
       width: 150,
     },
     {
-      field: "PortID",
-      headerName: "Port ID",
+      field: "Country",
+      headerName: "Country",
       width: 150,
     },
     {
@@ -82,6 +76,25 @@ export default function Port() {
     },
   ];
 
+  const { isLoading, error, data } = useQuery('repoData', () =>
+    fetch('http://192.168.43.75/glitter/api/port').then(res =>
+      res.json()
+    )
+  )
+
+  useEffect(() => {
+    console.log(data)
+    if (data) {
+      setPortData(data.map((port) => ({ id: port.PortID, PortName: port.PortName, Country: port.Country })));
+    }
+  }, [data]);
+
+  if (isLoading) return <Loading />;
+
+  if (error) return 'An error has occurred: ' + error.message
+
+  console.log("PORT", portData)
+
   function addCustomerToolBar() {
     return (
       <GridToolbarContainer>
@@ -97,6 +110,8 @@ export default function Port() {
     );
   }
 
+  console.log("DATA", data);
+
   return (
     <Paper sx={{ p: 2 }}>
       <Typography fontWeight={"bold"} gutterBottom>
@@ -104,7 +119,7 @@ export default function Port() {
       </Typography>
       <DataGrid
         style={{ minHeight: "68vh", border: "none" }}
-        rows={rows}
+        rows={portData}
         columns={columns}
         components={{
           Toolbar: addCustomerToolBar,

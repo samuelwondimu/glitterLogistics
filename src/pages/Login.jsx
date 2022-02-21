@@ -12,9 +12,9 @@ import Grid from '@mui/material/Grid';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Typography from '@mui/material/Typography';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { useAuth } from '../App';
 import { IconButton, useTheme } from '@mui/material';
 import { useToggleTheme } from '../theme/useTheme';
+import { login } from '../api/auth';
 
 function Copyright(props) {
     return (
@@ -33,23 +33,16 @@ function Copyright(props) {
 export default function SignInSide() {
     let navigate = useNavigate();
     let location = useLocation();
-    let auth = useAuth();
     const theme = useTheme();
     const changeTheme = useToggleTheme();
-
 
     let from = location.state?.from?.pathname || '/dashboard';
 
     const handleSubmit = (event) => {
         event.preventDefault();
         const data = new FormData(event.currentTarget);
-        // eslint-disable-next-line no-console
-        let email = data.get('email');
-        // let password = data.get('password');
-
-        auth.signin(email, () => {
-            navigate(from, { replace: true });
-        })
+        login(data.get('email'), data.get('password'))
+        navigate(from, { replace: true });
     };
 
     return (
