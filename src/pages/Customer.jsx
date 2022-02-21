@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { DataGrid, GridToolbarContainer } from "@mui/x-data-grid";
 import {
   Box,
@@ -11,25 +11,25 @@ import {
   Typography,
 } from "@mui/material";
 import { Add as AddIcon, DeleteOutline } from "@mui/icons-material";
+import { getCustomers } from "../api/customers";
+import { useQuery } from "react-query";
+import Loading from "../components/Loading";
 
 const columns = [
-  { field: "id", headerName: "ID", width: 90 },
+  { field: "id", headerName: "ID", hidden: true },
   {
-    field: "customerName",
+    field: "CustomerName",
     headerName: "Customer name",
     width: 150,
-    editable: true,
-    valueGetter: (params) =>
-      `${params.row.firstName || ""} ${params.row.lastName || ""}`,
   },
   {
-    field: "customerType",
+    field: "CustomerType",
     headerName: "Customer Type",
     width: 150,
     editable: true,
   },
   {
-    field: "ContactPerson",
+    field: "ContactPersons",
     headerName: "Contact Person",
     type: "number",
     width: 150,
@@ -43,8 +43,8 @@ const columns = [
     width: 160,
   },
   {
-    field: "Telephone",
-    headerName: "Telephone",
+    field: "Telephone1",
+    headerName: "Telephone One",
     width: 150,
     editable: true,
   },
@@ -55,7 +55,7 @@ const columns = [
     editable: true,
   },
   {
-    field: "VATNo",
+    field: "VATRegNo",
     headerName: "VAT No",
     width: 100,
   },
@@ -91,136 +91,9 @@ const columns = [
   },
 ];
 
-const rows = [
-  {
-    id: 1,
-    customerType: "manager",
-    ContactPerson: "ababeb",
-    Adress: "addis ababa bole",
-    Telephone: "345241481",
-    Mobile: "3123212412",
-    VATNo: "12413123",
-    Email: "glitter@gmail.com",
-    TINNo: "98240918043",
-    lastName: "Snow",
-    firstName: "Jon",
-    age: 35,
-  },
-  {
-    id: 2,
-    customerType: "manager",
-    ContactPerson: "ababeb",
-    Adress: "addis ababa bole",
-    Telephone: "345241481",
-    Mobile: "3123212412",
-    VATNo: "12413123",
-    Email: "glitter@gmail.com",
-    TINNo: "98240918043",
-    lastName: "Lannister",
-    firstName: "Cersei",
-    age: 42,
-  },
-  {
-    id: 3,
-    customerType: "manager",
-    ContactPerson: "ababeb",
-    Adress: "addis ababa bole",
-    Telephone: "345241481",
-    Mobile: "3123212412",
-    VATNo: "12413123",
-    Email: "glitter@gmail.com",
-    TINNo: "98240918043",
-    lastName: "Lannister",
-    firstName: "Jaime",
-    age: 45,
-  },
-  {
-    id: 4,
-    customerType: "manager",
-    ContactPerson: "ababeb",
-    Adress: "addis ababa bole",
-    Telephone: "345241481",
-    Mobile: "3123212412",
-    VATNo: "12413123",
-    Email: "glitter@gmail.com",
-    TINNo: "98240918043",
-    lastName: "Stark",
-    firstName: "Arya",
-    age: 16,
-  },
-  {
-    id: 5,
-    customerType: "manager",
-    ContactPerson: "ababeb",
-    Adress: "addis ababa bole",
-    Telephone: "345241481",
-    Mobile: "3123212412",
-    VATNo: "12413123",
-    Email: "glitter@gmail.com",
-    TINNo: "98240918043",
-    lastName: "Targaryen",
-    firstName: "Daenerys",
-    age: null,
-  },
-  {
-    id: 6,
-    customerType: "manager",
-    ContactPerson: "ababeb",
-    Adress: "addis ababa bole",
-    Telephone: "345241481",
-    Mobile: "3123212412",
-    VATNo: "12413123",
-    Email: "glitter@gmail.com",
-    TINNo: "98240918043",
-    lastName: "Melisandre",
-    firstName: null,
-    age: 150,
-  },
-  {
-    id: 7,
-    customerType: "manager",
-    ContactPerson: "ababeb",
-    Adress: "addis ababa bole",
-    Telephone: "345241481",
-    Mobile: "3123212412",
-    VATNo: "12413123",
-    Email: "glitter@gmail.com",
-    TINNo: "98240918043",
-    lastName: "Clifford",
-    firstName: "Ferrara",
-    age: 44,
-  },
-  {
-    id: 8,
-    customerType: "manager",
-    ContactPerson: "ababeb",
-    Adress: "addis ababa bole",
-    Telephone: "345241481",
-    Mobile: "3123212412",
-    VATNo: "12413123",
-    Email: "glitter@gmail.com",
-    TINNo: "98240918043",
-    lastName: "Frances",
-    firstName: "Rossini",
-    age: 36,
-  },
-  {
-    id: 9,
-    customerType: "manager",
-    ContactPerson: "ababeb",
-    Adress: "addis ababa bole",
-    Telephone: "345241481",
-    Mobile: "3123212412",
-    VATNo: "12413123",
-    Email: "glitter@gmail.com",
-    TINNo: "98240918043",
-    lastName: "Roxie",
-    firstName: "Harvey",
-    age: 65,
-  },
-];
-
 export default function Customer() {
+  const [customers, setCustomers] = useState('')
+
   const [open, setOpen] = useState(false);
   const handleClickOpen = () => {
     setOpen(true);
@@ -249,6 +122,23 @@ export default function Customer() {
       </GridToolbarContainer>
     );
   }
+
+  const { isLoading, error, data } = useQuery('customers', () =>
+    getCustomers(localStorage.getItem("token")).then((res) => res)
+  )
+
+  useEffect(() => {
+    if (data) {
+      setCustomers(data.map((customer) => ({ id: customer.CustomerID, ...customer })));
+    };
+  }, [data]);
+
+  console.log("CUSTOMERS", customers);
+
+  if (isLoading) return <Loading />;
+
+  if (error) return 'An error has occurred: ' + error.message
+
   return (
     <Paper sx={{ p: 2 }}>
       <Typography fontWeight={"bold"} gutterBottom>
@@ -256,7 +146,7 @@ export default function Customer() {
       </Typography>
       <DataGrid
         style={{ minHeight: "68vh", border: "none" }}
-        rows={rows}
+        rows={customers}
         columns={columns}
         components={{
           Toolbar: addCustomerToolBar,

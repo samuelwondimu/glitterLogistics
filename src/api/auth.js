@@ -1,4 +1,3 @@
-import { useLocalStorage } from "../hooks/useLocalStorage";
 import { API_BASE } from "./base";
 
 export function login(username, password) {
