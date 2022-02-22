@@ -16,24 +16,27 @@ import {
   EditOutlined,
 } from "@mui/icons-material";
 import { useQuery } from "react-query";
-import Loading from "../components/Loading";
+import { createPort, deletePort, getPorts, updatePorts } from "../api/port";
+import { useSnackbar } from "notistack";
 
 export default function Port() {
-  const [open, setOpen] = useState(false);
+  const { enqueueSnackbar } = useSnackbar();
   const [portData, setPortData] = useState([]);
-  const handleClickOpen = () => {
-    setOpen(true);
+
+  // handle edit modal
+  const [editOpen, setEditOpen] = useState(false);
+  const [editPort, setEditPort] = useState(null);
+  const handleEditOpen = () => setEditOpen(true);
+  const handleEditClose = () => {
+    setEditOpen(false);
+    setEditPort(null);
   };
 
-  const handleClose = (value) => {
-    setOpen(false);
-  };
+  // handle create modal
+  const [createOpen, setCreateOpen] = useState(false);
+  const handleCreateOpen = () => setCreateOpen(true);
+  const handleCreateClose = () => setCreateOpen(false);
 
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    const data = new FormData(event.currentTarget);
-    console.log(data);
-  };
   const columns = [
     {
       field: "id",
@@ -54,33 +57,90 @@ export default function Port() {
       field: "createdAt",
       headerName: "Actions",
       width: 250,
-      renderCell: (params) => (
-        <>
-          <Button
-            variant="contained"
-            startIcon={<EditOutlined />}
-            sx={{ mr: 1 }}
-            color="success"
-          >
-            Edit
-          </Button>
-          <Button
-            variant="contained"
-            startIcon={<DeleteOutline />}
-            color="error"
-          >
-            Delete
-          </Button>
-        </>
-      ),
+      renderCell: (params) => {
+        async function editRow() {
+          const rowData = params.row;
+          handleEditOpen();
+          setEditPort(rowData);
+          console.log(`${params.row.id} edited`)
+        }
+
+        async function deleteRow() {
+          await deletePort(localStorage.getItem("token"), params.row.id).then((res) => {
+            const responseMessage = res
+            if (responseMessage.ID === 2) {
+              alert("Port deleted successfully")
+            } else if (responseMessage.ID === 0) {
+              refetch()
+              enqueueSnackbar(responseMessage.Message, { variant: "error" });
+              setPortData(portData.filter((item) => item.id !== params.row.id));
+            }
+          });
+        }
+
+        return (
+          <>
+            <Button
+              variant="contained"
+              startIcon={<EditOutlined />}
+              sx={{ mr: 1 }}
+              color="success"
+              onClick={editRow}
+            >
+              Edit
+            </Button>
+            <Button
+              variant="contained"
+              startIcon={<DeleteOutline />}
+              color="error"
+              onClick={deleteRow}
+            >
+              Delete
+            </Button>
+          </>
+        );
+      },
     },
   ];
 
-  const { isLoading, error, data } = useQuery('repoData', () =>
-    fetch('http://192.168.43.75/glitter/api/port').then(res =>
-      res.json()
-    )
+  const { isLoading, error, data, refetch } = useQuery('repoData', () =>
+    getPorts(localStorage.getItem('token')).then((res) => res)
   )
+
+  // create modal
+  const handleCreate = (event) => {
+    event.preventDefault();
+    const Data = new FormData(event.currentTarget);
+    const port = {
+      PortName: Data.get("PortName"),
+      Country: Data.get("Country"),
+    };
+    createPort(port, localStorage.getItem("token")).then((res) => {
+      const responseMessage = res
+      enqueueSnackbar(responseMessage.Message);
+      refetch();
+      setCreateOpen(false);
+      handleCreateClose();
+    });
+  }
+
+  // edit modal
+  const handleEdit = (event) => {
+    event.preventDefault();
+    const data = new FormData(event.currentTarget);
+
+    const port = {
+      PortID: editPort.id,
+      PortName: data.get("PortName"),
+      Country: data.get("Country"),
+    };
+    updatePorts(localStorage.getItem("token"), port).then((res) => {
+      const responseMessage = res
+      enqueueSnackbar(responseMessage.Message);
+      refetch();
+      handleEditClose();
+    });
+  };
 
   useEffect(() => {
     console.log(data)
@@ -89,7 +149,6 @@ export default function Port() {
     }
   }, [data]);
 
-  if (isLoading) return <Loading />;
 
   if (error) return 'An error has occurred: ' + error.message
 
@@ -102,7 +161,7 @@ export default function Port() {
           color="primary"
           startIcon={<AddIcon />}
           variant="contained"
-          onClick={handleClickOpen}
+          onClick={handleCreateOpen}
         >
           Add Port
         </Button>
@@ -125,16 +184,18 @@ export default function Port() {
           Toolbar: addCustomerToolBar,
         }}
         pageSize={12}
+        loading={isLoading}
         rowsPerPageOptions={[8]}
         disableSelectionOnClick
       />
 
-      <Dialog onClose={handleClose} open={open}>
-        <DialogTitle>Add A New Port</DialogTitle>
+      {/* create */}
+      <Dialog onClose={handleCreateClose} open={createOpen}>
+        <DialogTitle>Create Port</DialogTitle>
         <Box
           component="form"
           noValidate
-          onSubmit={handleSubmit}
+          onSubmit={handleCreate}
           sx={{ px: 3, pb: 3 }}
         >
           <Grid container spacing={1}>
@@ -143,11 +204,8 @@ export default function Port() {
                 margin="normal"
                 required
                 fullWidth
-                id="email"
-                label="Customer Name"
-                name="email"
-                autoComplete="email"
-                autoFocus
+                label="Port Name"
+                name="PortName"
               />
             </Grid>
             <Grid item xs={6}>
@@ -155,23 +213,35 @@ export default function Port() {
                 margin="normal"
                 required
                 fullWidth
-                id="email"
-                label="Customer Type"
-                name="email"
-                autoComplete="email"
-                autoFocus
+                label="Country"
+                name="Country"
               />
             </Grid>
-            <Grid item xs={12}>
+            <Grid item xs={6}>
+              <Button type='submit' variant="contained">Create Port</Button>
+            </Grid>
+          </Grid>
+        </Box>
+      </Dialog>
+
+      {/* edit  */}
+      <Dialog onClose={handleEditClose} open={editOpen}>
+        <DialogTitle>Edit Port</DialogTitle>
+        <Box
+          component="form"
+          noValidate
+          onSubmit={handleEdit}
+          sx={{ px: 3, pb: 3 }}
+        >
+          <Grid container spacing={1}>
+            <Grid item xs={6}>
               <TextField
                 margin="normal"
                 required
                 fullWidth
-                id="email"
-                label="Address"
-                name="email"
-                autoComplete="email"
-                autoFocus
+                label="Port Name"
+                name="PortName"
+                defaultValue={editPort ? editPort.PortName : ""}
               />
             </Grid>
             <Grid item xs={6}>
@@ -179,16 +249,13 @@ export default function Port() {
                 margin="normal"
                 required
                 fullWidth
-                id="email"
-                label="Contact Person"
-                name="email"
-                autoComplete="email"
-                autoFocus
+                label="Country"
+                name="Country"
+                defaultValue={editPort ? editPort.Country : ""}
               />
             </Grid>
-            <Grid item xs={6} />
             <Grid item xs={6}>
-              <Button variant="contained">Add Port</Button>
+              <Button type='submit' variant="contained">Update Port</Button>
             </Grid>
           </Grid>
         </Box>
@@ -197,47 +264,3 @@ export default function Port() {
   );
 }
 
-const rows = [
-  {
-    id: 2,
-    Port: "china",
-    PortID: "92304920",
-    PortName: "china logstics",
-    Country: "China",
-  },
-  {
-    id: 2,
-    Port: "china",
-    PortID: "92304920",
-    PortName: "china logstics",
-    Country: "China",
-  },
-  {
-    id: 2,
-    Port: "china",
-    PortID: "92304920",
-    PortName: "china logstics",
-    Country: "China",
-  },
-  {
-    id: 2,
-    Port: "china",
-    PortID: "92304920",
-    PortName: "china logstics",
-    Country: "China",
-  },
-  {
-    id: 2,
-    Port: "china",
-    PortID: "92304920",
-    PortName: "china logstics",
-    Country: "China",
-  },
-  {
-    id: 2,
-    Port: "china",
-    PortID: "92304920",
-    PortName: "china logstics",
-    Country: "China",
-  },
-];

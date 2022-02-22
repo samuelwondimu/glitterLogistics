@@ -1,6 +1,7 @@
 import React from 'react';
 import { QueryClient, QueryClientProvider } from 'react-query'
 import { BrowserRouter, Navigate, Route, Routes, useLocation } from 'react-router-dom';
+import { SnackbarProvider } from 'notistack';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard'
 import DashboardLayout from './components/DashboardLayout';
@@ -18,29 +19,31 @@ const queryClient = new QueryClient()
 
 export default function App() {
   return <>
-    <QueryClientProvider client={queryClient}>
-      <ThemeContext>
-        <AuthProvider>
-          <BrowserRouter>
-            <Routes>
-              <Route path="/" element={<Login />} />
-              <Route path="/dashboard" element={<DashboardLayout />} >
-                {/* dashboard protected route components goes here */}
-                <Route path='' element={<Dashboard />} />
-                <Route path='commodity' element={<Commodity />} />
-                <Route path='customers' element={<Customer />} />
-                <Route path='expense' element={<Expense />} />
-                <Route path='port' element={<Port />} />
-                <Route path='invoice' element={<Invoice />} />
-                <Route path='operations' element={<Operations />} />
-                <Route path='service-provider' element={<ServiceProvider />} />
-                <Route path='users' elemenet={<Users />} />
-              </Route>
-            </Routes>
-          </BrowserRouter>
-        </AuthProvider>
-      </ThemeContext>
-    </QueryClientProvider>
+    <AuthProvider>
+      <SnackbarProvider maxSnack={3}>
+        <QueryClientProvider client={queryClient}>
+          <ThemeContext>
+            <BrowserRouter>
+              <Routes>
+                <Route path="/" element={<Login />} />
+                <Route path="/dashboard" element={<DashboardLayout />} >
+                  {/* dashboard protected route components goes here */}
+                  <Route path='' element={<Dashboard />} />
+                  <Route path='commodity' element={<Commodity />} />
+                  <Route path='customers' element={<Customer />} />
+                  <Route path='expense' element={<Expense />} />
+                  <Route path='port' element={<Port />} />
+                  <Route path='invoice' element={<Invoice />} />
+                  <Route path='operations' element={<Operations />} />
+                  <Route path='service-provider' element={<ServiceProvider />} />
+                  <Route path='users' elemenet={<Users />} />
+                </Route>
+              </Routes>
+            </BrowserRouter>
+          </ThemeContext>
+        </QueryClientProvider>
+      </SnackbarProvider>
+    </AuthProvider>
   </>;
 }
 
