@@ -10,28 +10,12 @@ import {
   Typography,
 } from "@mui/material";
 import { DataGrid, GridToolbarContainer } from "@mui/x-data-grid";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useQuery } from "react-query";
-import Loading from '../components/Loading';
-
-function createRow(data) {
-  return {
-    id: data.id,
-    operationNumber: data.operationNumber,
-    CustomerID: data.CustomerID,
-    OperationType: data.OperationType,
-    PermitNumber: data.PermitNumber,
-    DeclarationNumber: data.DeclarationNumber,
-    TypeOfDeclaration: data.TypeOfDeclaration,
-    CustomerReferenceNumber: data.CustomerReferenceNumber,
-    OrderType: data.OrderType,
-    ShippingInstructionNumber: data.ShippingInstructionNumber,
-    Remark: data.Remark,
-    UserID: data.UserID,
-  };
-}
+import { getOperations } from "../api/operation";
 
 export default function Operations() {
+  const [operations, setOperations] = useState(null);
   const [open, setOpen] = useState(false);
   const handleClickOpen = () => {
     setOpen(true);
@@ -47,13 +31,90 @@ export default function Operations() {
   };
 
 
-  const { isLoading, error, data } = useQuery('repoData', () =>
-    fetch('http://localhost:5019/api/operation').then(res =>
-      res.json()
-    )
+  const columns = [
+    {
+      field: "id",
+      headerName: "ID",
+    },
+    {
+      field: "OperationType",
+      headerName: "Operation Type",
+      width: 100,
+    },
+    {
+      field: 'StartDate',
+      headerName: 'Start Date',
+      width: 100,
+    },
+    {
+      field: "CustomerName",
+      headerName: "Customer Name",
+      width: 100,
+    },
+    {
+      field: "LoadPortName",
+      headerName: "Load Port Name",
+      width: 100,
+    },
+    {
+      field: "DischargePortName",
+      headerName: "Discharge Port Name",
+      width: 150,
+    },
+    {
+      field: "OperationType",
+      headerName: "Operation Type",
+      width: 50,
+    },
+    {
+      field: "TypeOfDeclaration",
+      headerName: "Type Of Declaration",
+      width: 100,
+    },
+    {
+      field: "OrderType",
+      headerName: "Order Type",
+      width: 150,
+    },
+    {
+      field: "Remark",
+      headerName: "Remark",
+      width: 150,
+    },
+    {
+      field: "OperationStatus",
+      headerName: "Actions",
+      width: 250,
+      renderCell: (params) => (
+        <>
+          <Button
+            variant="contained"
+            startIcon={<EditOutlined />}
+            sx={{ mr: 1 }}
+            color="success"
+          >
+            Edit
+          </Button>
+          <Button variant="contained" startIcon={<DeleteOutline />} color="error">
+            Delete
+          </Button>
+        </>
+      ),
+    },
+  ];
+
+
+  const { isLoading, error, data } = useQuery('operations', () =>
+    getOperations(localStorage.getItem('token')).then((res) => res)
   )
 
-  if (isLoading) return <Loading />
+  useEffect(() => {
+    if (data) {
+      setOperations(data.map((operation) => ({ id: operation.OperationNumber, ...operation })));
+    };
+  }, [data]);
+
+  console.log("OPERATION", data);
 
   if (error) return 'An error has occurred: ' + error.message
 
@@ -80,11 +141,12 @@ export default function Operations() {
       </Typography>
       <DataGrid
         style={{ minHeight: "68vh", border: "none" }}
-        rows={rows}
+        rows={operations}
         columns={columns}
         components={{
           Toolbar: addCustomerToolBar,
         }}
+        loading={isLoading}
         disableSelectionOnClick
       />
       <Dialog onClose={handleClose} open={open}>
@@ -213,167 +275,3 @@ export default function Operations() {
     </Paper>
   );
 }
-
-const columns = [
-  {
-    field: "id",
-    headerName: "ID",
-  },
-  {
-    field: "operationNumber",
-    headerName: "Operation Number",
-    width: 150,
-  },
-  {
-    field: "CustomerID",
-    headerName: "Customer ID",
-    width: 100,
-  },
-  {
-    field: "OperationType",
-    headerName: "Operation Type",
-    width: 100,
-  },
-  {
-    field: "PermitNumber",
-    headerName: "Permit Number",
-    width: 100,
-  },
-  {
-    field: "DeclarationNumber",
-    headerName: "Declaration Number",
-    width: 100,
-  },
-  {
-    field: "TypeOfDeclaration",
-    headerName: "Type Of Declaration",
-    width: 150,
-  },
-  {
-    field: "CustomerReferenceNumber",
-    headerName: "Customer Reference Number",
-    width: 50,
-  },
-  {
-    field: "OrderType",
-    headerName: "Order Type",
-    width: 100,
-  },
-  {
-    field: "ShippingInstructionNumber",
-    headerName: "Shipping Instruction Number",
-    width: 150,
-  },
-  {
-    field: "Remark",
-    headerName: "Remark",
-    width: 150,
-  },
-  {
-    field: "createdAt",
-    headerName: "Actions",
-    width: 250,
-    renderCell: (params) => (
-      <>
-        <Button
-          variant="contained"
-          startIcon={<EditOutlined />}
-          sx={{ mr: 1 }}
-          color="success"
-        >
-          Edit
-        </Button>
-        <Button variant="contained" startIcon={<DeleteOutline />} color="error">
-          Delete
-        </Button>
-      </>
-    ),
-  },
-];
-
-const rows = [
-  createRow({
-    id: 334,
-    operationNumber: "312",
-    CustomerID: "453",
-    OperationType: "shipping",
-    PermitNumber: "123",
-    DeclarationNumber: "0912",
-    TypeOfDeclaration: "construction",
-    CustomerReferenceNumber: "31",
-    OrderType: "cargo",
-    ShippingInstructionNumber: "123091823",
-    Remark: "to be delivered as fast",
-    UserID: "1231",
-  }),
-  createRow({
-    id: 335,
-    operationNumber: "312",
-    CustomerID: "453",
-    OperationType: "shipping",
-    PermitNumber: "123",
-    DeclarationNumber: "0912",
-    TypeOfDeclaration: "construction",
-    CustomerReferenceNumber: "31",
-    OrderType: "cargo",
-    ShippingInstructionNumber: "123091823",
-    Remark: "to be delivered as fast",
-    UserID: "1231",
-  }),
-  createRow({
-    id: 336,
-    operationNumber: "312",
-    CustomerID: "453",
-    OperationType: "shipping",
-    PermitNumber: "123",
-    DeclarationNumber: "0912",
-    TypeOfDeclaration: "construction",
-    CustomerReferenceNumber: "31",
-    OrderType: "cargo",
-    ShippingInstructionNumber: "123091823",
-    Remark: "to be delivered as fast",
-    UserID: "1231",
-  }),
-  createRow({
-    id: 337,
-    operationNumber: "312",
-    CustomerID: "453",
-    OperationType: "shipping",
-    PermitNumber: "123",
-    DeclarationNumber: "0912",
-    TypeOfDeclaration: "construction",
-    CustomerReferenceNumber: "31",
-    OrderType: "cargo",
-    ShippingInstructionNumber: "123091823",
-    Remark: "to be delivered as fast",
-    UserID: "1231",
-  }),
-  createRow({
-    id: 338,
-    operationNumber: "312",
-    CustomerID: "453",
-    OperationType: "shipping",
-    PermitNumber: "123",
-    DeclarationNumber: "0912",
-    TypeOfDeclaration: "construction",
-    CustomerReferenceNumber: "31",
-    OrderType: "cargo",
-    ShippingInstructionNumber: "123091823",
-    Remark: "to be delivered as fast",
-    UserID: "1231",
-  }),
-  createRow({
-    id: 339,
-    operationNumber: "312",
-    CustomerID: "453",
-    OperationType: "shipping",
-    PermitNumber: "123",
-    DeclarationNumber: "0912",
-    TypeOfDeclaration: "construction",
-    CustomerReferenceNumber: "31",
-    OrderType: "cargo",
-    ShippingInstructionNumber: "123091823",
-    Remark: "to be delivered as fast",
-    UserID: "1231",
-  }),
-];

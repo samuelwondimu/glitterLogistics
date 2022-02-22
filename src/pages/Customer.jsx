@@ -233,7 +233,6 @@ export default function Customer() {
 
   console.log("CUSTOMERS", customers);
 
-  if (isLoading) return <Loading />;
 
   if (error) return 'An error has occurred: ' + error.message
 
@@ -249,6 +248,7 @@ export default function Customer() {
         components={{
           Toolbar: addCustomerToolBar,
         }}
+        loading={isLoading}
         disableSelectionOnClick
       />
 
