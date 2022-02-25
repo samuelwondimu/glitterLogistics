@@ -2,7 +2,7 @@ import { API_BASE } from "./base";
 
 // get operations
 export async function getOperations(token) {
-    const response = await fetch(`${API_BASE}/operation`, {
+    const response = await fetch(`${API_BASE}/operation/Active`, {
         method: 'GET',
         headers: {
             "Accept": "*/*",

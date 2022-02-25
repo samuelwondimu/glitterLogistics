@@ -1,19 +1,15 @@
 import {
   Delete,
   Done,
-  DoneAll,
-  DoneOutline,
   Folder,
   Inventory2,
   PaidOutlined,
   PeopleAltOutlined,
   Receipt,
-  Report,
   Settings,
   SettingsAccessibility,
 } from "@mui/icons-material";
 import {
-  Avatar,
   Box,
   Button,
   Card,
@@ -47,7 +43,6 @@ import React, { useEffect, useState } from "react";
 import { getCurrenUser } from "../api/auth";
 import { getReports } from "../api/report";
 import { getTodos } from "../api/todo";
-import { useLocalStorage } from "../hooks/useLocalStorage";
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.head}`]: {
@@ -407,41 +402,3 @@ export default function Dashboard() {
     </div>
   );
 }
-
-const todoList = [
-  {
-    title: "submit invoice to hr manager",
-    subtitle:
-      "invoice starting from date 21 to 23 havent been submitted for a reivew by the hr manager complete this task before 21 may or else you are fired",
-  },
-  {
-    title: "submit invoice to hr manager",
-    subtitle:
-      "invoice starting from date 21 to 23 havent been submitted for a reivew by the hr manager complete this task before 21 may or else you are fired",
-  },
-  {
-    title: "submit invoice to hr manager",
-    subtitle:
-      "invoice starting from date 21 to 23 havent been submitted for a reivew by the hr manager complete this task before 21 may or else you are fired",
-  },
-  {
-    title: "submit invoice to hr manager",
-    subtitle:
-      "invoice starting from date 21 to 23 havent been submitted for a reivew by the hr manager complete this task before 21 may or else you are fired",
-  },
-  {
-    title: "submit invoice to hr manager",
-    subtitle:
-      "invoice starting from date 21 to 23 havent been submitted for a reivew by the hr manager complete this task before 21 may or else you are fired",
-  },
-  {
-    title: "submit invoice to hr manager",
-    subtitle:
-      "invoice starting from date 21 to 23 havent been submitted for a reivew by the hr manager complete this task before 21 may or else you are fired",
-  },
-  {
-    title: "submit invoice to hr manager",
-    subtitle:
-      "invoice starting from date 21 to 23 havent been submitted for a reivew by the hr manager complete this task before 21 may or else you are fired",
-  },
-];

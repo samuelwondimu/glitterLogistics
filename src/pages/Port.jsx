@@ -1,12 +1,7 @@
 import React, { useEffect, useState } from "react";
 import {
-  Box,
   Button,
-  Dialog,
-  DialogTitle,
-  Grid,
   Paper,
-  TextField,
   Typography,
 } from "@mui/material";
 import { DataGrid, GridToolbarContainer } from "@mui/x-data-grid";
@@ -18,6 +13,7 @@ import {
 import { useQuery } from "react-query";
 import { createPort, deletePort, getPorts, updatePorts } from "../api/port";
 import { useSnackbar } from "notistack";
+import CustomeDialog from '../components/CustomDialog'
 
 export default function Port() {
   const { enqueueSnackbar } = useSnackbar();
@@ -115,6 +111,7 @@ export default function Port() {
       PortName: Data.get("PortName"),
       Country: Data.get("Country"),
     };
+    console.log(port)
     createPort(port, localStorage.getItem("token")).then((res) => {
       const responseMessage = res
       enqueueSnackbar(responseMessage.Message);
@@ -171,6 +168,19 @@ export default function Port() {
 
   console.log("DATA", data);
 
+  const portForm = [
+    {
+      label: 'Port Name',
+      name: 'PortName',
+      defaultValue: editPort ? editPort?.PortName : ''
+    },
+    {
+      label: 'Country',
+      name: 'Country',
+      defaultValue: editPort ? editPort?.Country : ''
+    }
+  ]
+
   return (
     <Paper sx={{ p: 2 }}>
       <Typography fontWeight={"bold"} gutterBottom>
@@ -189,77 +199,27 @@ export default function Port() {
         disableSelectionOnClick
       />
 
-      {/* create */}
-      <Dialog onClose={handleCreateClose} open={createOpen}>
-        <DialogTitle>Create Port</DialogTitle>
-        <Box
-          component="form"
-          noValidate
-          onSubmit={handleCreate}
-          sx={{ px: 3, pb: 3 }}
-        >
-          <Grid container spacing={1}>
-            <Grid item xs={6}>
-              <TextField
-                margin="normal"
-                required
-                fullWidth
-                label="Port Name"
-                name="PortName"
-              />
-            </Grid>
-            <Grid item xs={6}>
-              <TextField
-                margin="normal"
-                required
-                fullWidth
-                label="Country"
-                name="Country"
-              />
-            </Grid>
-            <Grid item xs={6}>
-              <Button type='submit' variant="contained">Create Port</Button>
-            </Grid>
-          </Grid>
-        </Box>
-      </Dialog>
+      {/* create port  */}
+      <CustomeDialog
+        open={createOpen}
+        handleClose={handleCreateClose}
+        handleSubmit={handleCreate}
+        title={'Create Port'}
+        submitText={'create port'}
+        cancelText={'cancel'}
+        formData={portForm}
+      />
 
       {/* edit  */}
-      <Dialog onClose={handleEditClose} open={editOpen}>
-        <DialogTitle>Edit Port</DialogTitle>
-        <Box
-          component="form"
-          noValidate
-          onSubmit={handleEdit}
-          sx={{ px: 3, pb: 3 }}
-        >
-          <Grid container spacing={1}>
-            <Grid item xs={6}>
-              <TextField
-                margin="normal"
-                required
-                fullWidth
-                label="Port Name"
-                name="PortName"
-                defaultValue={editPort ? editPort.PortName : ""}
-              />
-            </Grid>
-            <Grid item xs={6}>
-              <TextField
-                margin="normal"
-                required
-                fullWidth
-                label="Country"
-                name="Country"
-                defaultValue={editPort ? editPort.Country : ""}
-              />
-            </Grid>
-            <Grid item xs={6}>
-              <Button type='submit' variant="contained">Update Port</Button>
-            </Grid>
-          </Grid>
-        </Box>
-      </Dialog>
+      <CustomeDialog
+        open={editOpen}
+        handleClose={handleEditClose}
+        handleSubmit={handleEdit}
+        title={'Edit Port'}
+        submitText={'update port'}
+        cancelText={'cancel'}
+        formData={portForm}
+      />
     </Paper>
   );
 }

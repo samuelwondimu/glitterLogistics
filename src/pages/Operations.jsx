@@ -1,35 +1,55 @@
 import { Add, DeleteOutline, EditOutlined } from "@mui/icons-material";
 import {
+  Autocomplete,
   Box,
   Button,
   Dialog,
-  DialogTitle,
   Grid,
   Paper,
   TextField,
   Typography,
 } from "@mui/material";
 import { DataGrid, GridToolbarContainer } from "@mui/x-data-grid";
+import { useSnackbar } from "notistack";
 import React, { useEffect, useState } from "react";
 import { useQuery } from "react-query";
-import { getOperations } from "../api/operation";
+import { getCommodity } from "../api/commodity";
+import { getCustomers } from "../api/customers";
+import { createOperation, deleteOperation, getOperations, updateOperations } from "../api/operation";
+import { getPorts } from "../api/port";
+import CustomeDialog from "../components/CustomDialog";
 
 export default function Operations() {
   const [operations, setOperations] = useState(null);
-  const [open, setOpen] = useState(false);
-  const handleClickOpen = () => {
-    setOpen(true);
-  };
-  const handleClose = (value) => {
-    setOpen(false);
+  const [customers, setCustomers] = useState(null);
+  const [commodity, setCommodity] = useState(null);
+  const [ports, setPorts] = useState(null);
+  const [dischargePort, setDischargePort] = useState(null);
+  const [operationStatus, setOperationStatus] = useState('Draft');
+  const [newPort, setNewPort] = useState(null);
+  const [newCommodity, setNewCommodity] = useState(null);
+  const [newCustomer, setNewCustomer] = useState(null);
+  const { enqueueSnackbar } = useSnackbar();
+
+  // handle create operation
+  const [createOpen, setCreateOpen] = useState(false);
+  const handleCreateOpen = () => setCreateOpen(true);
+  const handleCreateClose = () => setCreateOpen(false);
+
+  // handle edit operation
+  const [editOpen, setEditOpen] = useState(false);
+  const [editOprationData, setEditOperationData] = useState(null);
+  const handleEditOpen = () => setEditOpen(true);
+  const handleEditClose = () => {
+    setEditOperationData(null);
+    setEditOpen(false);
   };
 
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    const data = new FormData(event.currentTarget);
-    console.log(data);
-  };
-
+  // handle delete operation
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [deleteMessage, setDeleteMessage] = useState('');
+  const handleDeleteOpen = () => setDeleteOpen(true);
+  const handleDeleteClose = () => setDeleteOpen(false);
 
   const columns = [
     {
@@ -85,26 +105,51 @@ export default function Operations() {
       field: "OperationStatus",
       headerName: "Actions",
       width: 250,
-      renderCell: (params) => (
-        <>
-          <Button
-            variant="contained"
-            startIcon={<EditOutlined />}
-            sx={{ mr: 1 }}
-            color="success"
-          >
-            Edit
-          </Button>
-          <Button variant="contained" startIcon={<DeleteOutline />} color="error">
-            Delete
-          </Button>
-        </>
-      ),
+      renderCell: (params) => {
+        async function handleEdit() {
+          const rowData = params.row;
+          handleEditOpen();
+          console.log(rowData)
+          setEditOperationData(rowData);
+        };
+
+        async function handleDelete() {
+          await deleteOperation(localStorage.getItem("token"), params.row.id).then(res => {
+            const responseMessage = res;
+            if (responseMessage.ID === 0) {
+              enqueueSnackbar("Operation deleted successfully", {
+                variant: "success",
+              });
+              refetch();
+            } else {
+              handleDeleteOpen();
+              setDeleteMessage(responseMessage.Message);
+            }
+          });
+        };
+
+        return (
+          <>
+            <Button
+              variant="contained"
+              startIcon={<EditOutlined />}
+              sx={{ mr: 1 }}
+              color="success"
+              onClick={handleEdit}
+            >
+              Edit
+            </Button>
+            <Button variant="contained" startIcon={<DeleteOutline />} color="error" onClick={handleDelete}>
+              Delete
+            </Button>
+          </>
+        )
+      },
     },
   ];
 
 
-  const { isLoading, error, data } = useQuery('operations', () =>
+  const { isLoading, error, data, refetch } = useQuery('operations', () =>
     getOperations(localStorage.getItem('token')).then((res) => res)
   )
 
@@ -112,9 +157,16 @@ export default function Operations() {
     if (data) {
       setOperations(data.map((operation) => ({ id: operation.OperationNumber, ...operation })));
     };
+    getCustomers(localStorage.getItem("token")).then((res) => res).then((res) => {
+      setCustomers(res.map((customer) => ({ id: customer.CustomerID, label: customer.CustomerName })));
+    });
+    getCommodity(localStorage.getItem("token")).then((res) => res).then((res) => {
+      setCommodity(res.map((commodity) => ({ id: commodity.CommodityID, label: commodity.CommodityName })))
+    })
+    getPorts(localStorage.getItem("token")).then((res) => res).then((res) => {
+      setPorts(res.map((port) => ({ id: port.PortID, label: port.PortName })))
+    })
   }, [data]);
-
-  console.log("OPERATION", data);
 
   if (error) return 'An error has occurred: ' + error.message
 
@@ -126,13 +178,99 @@ export default function Operations() {
           startIcon={<Add />}
           variant="contained"
           sx={{ textTransform: "none" }}
-          onClick={handleClickOpen}
+          onClick={handleCreateOpen}
         >
           New Operation
         </Button>
       </GridToolbarContainer>
     );
   }
+
+  async function handleCreate(event) {
+    event.preventDefault();
+    const data = new FormData(event.currentTarget);
+    const operation = {
+      CustomerID: await newCustomer?.id,
+      CustomerName: await newCustomer?.label,
+      CommodityId: await newCommodity?.id,
+      LoadPort: await newPort?.id,
+      LoadPortName: await newPort?.label,
+      DischargePortName: await newPort?.label,
+      DischargePort: await dischargePort?.id,
+      OperationNumber: data.get("OperationNumber"),
+      OperationType: data.get("OperationType"),
+      StartDate: new Date(Date.now()),
+      OperationStatus: 'Active',
+      TypeOfDeclaration: data.get("TypeOfDeclaration"),
+      OrderType: data.get("OrderType"),
+      Remark: data.get("Remark"),
+    };
+    await createOperation(operation, localStorage.getItem("token")).then(res => {
+      const responseMessage = res;
+      enqueueSnackbar(responseMessage.Message, {
+        variant: "success",
+      });
+      refetch();
+      setCreateOpen(false);
+    })
+  }
+
+  async function handleEdit(event) {
+    event.preventDefault();
+    const data = new FormData(event.currentTarget);
+    const operation = {
+      CustomerID: editOprationData?.CustomerID,
+      CommodityID: editOprationData?.CommodityID,
+      LoadPort: editOprationData?.LoadPort,
+      DischargePort: editOprationData?.DischargePort,
+      OperationNumber: data.get("OperationNumber"),
+      OperationType: data.get("OperationType"),
+      TypeOfDeclaration: data.get("TypeOfDeclaration"),
+      OrderType: data.get("OrderType"),
+      Remark: data.get("Remark"),
+      OperationStatus: operationStatus,
+    };
+    await updateOperations(localStorage.getItem("token"), operation).then(res => {
+      const responseMessage = res;
+      enqueueSnackbar(responseMessage.Message, { variant: "success" });
+      refetch();
+      setEditOperationData(null);
+    });
+    setEditOpen(false);
+    setEditOperationData(null);
+  }
+
+  async function handleDelete(operationId) { }
+
+  const operationForm = [
+    {
+      label: 'Operation Type',
+      name: 'OperationType',
+      defaultValue: editOprationData ? editOprationData.OperationType : '',
+    },
+    {
+      label: 'Operation Number',
+      name: 'OperationNumber',
+      defaultValue: editOprationData ? editOprationData.OperationNumber : '',
+    },
+    {
+      label: 'Type Of Declaration',
+      name: 'TypeOfDeclaration',
+      defaultValue: editOprationData ? editOprationData.TypeOfDeclaration : '',
+    },
+    {
+      label: 'Order Type',
+      name: 'OrderType',
+      defaultValue: editOprationData ? editOprationData.OrderType : '',
+    },
+    {
+      label: 'Remark',
+      name: 'Remark',
+      defaultValue: editOprationData ? editOprationData.Remark : '',
+    },
+  ]
+
+  console.log(newCustomer)
 
   return (
     <Paper sx={{ p: 2 }}>
@@ -149,127 +287,155 @@ export default function Operations() {
         loading={isLoading}
         disableSelectionOnClick
       />
-      <Dialog onClose={handleClose} open={open}>
-        <DialogTitle>Add A New Operation</DialogTitle>
-        <Box
-          component="form"
-          noValidate
-          onSubmit={handleSubmit}
-          sx={{ px: 3, pb: 3 }}
-        >
-          <Grid container spacing={1}>
-            <Grid item xs={6}>
-              <TextField
-                margin="normal"
-                required
-                fullWidth
-                id="email"
-                label="Customer Name"
-                name="email"
-                autoComplete="email"
-                autoFocus
-              />
-            </Grid>
-            <Grid item xs={6}>
-              <TextField
-                margin="normal"
-                required
-                fullWidth
-                id="email"
-                label="Customer Type"
-                name="email"
-                autoComplete="email"
-                autoFocus
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                margin="normal"
-                required
-                fullWidth
-                id="email"
-                label="Address"
-                name="email"
-                autoComplete="email"
-                autoFocus
-              />
-            </Grid>
-            <Grid item xs={6}>
-              <TextField
-                margin="normal"
-                required
-                fullWidth
-                id="email"
-                label="Contact Person"
-                name="email"
-                autoComplete="email"
-                autoFocus
-              />
-            </Grid>
-            <Grid item xs={6}>
-              <TextField
-                margin="normal"
-                required
-                fullWidth
-                id="email"
-                label="Telephone 2"
-                name="email"
-                autoComplete="email"
-                autoFocus
-              />
-            </Grid>
-            <Grid item xs={6}>
-              <TextField
-                margin="normal"
-                required
-                fullWidth
-                id="email"
-                label="Telephone 2"
-                name="email"
-                autoComplete="email"
-                autoFocus
-              />
-            </Grid>
-            <Grid item xs={6}>
-              <TextField
-                margin="normal"
-                required
-                fullWidth
-                id="email"
-                label="mobile"
-                name="email"
-                autoComplete="email"
-                autoFocus
-              />
-            </Grid>
-            <Grid item xs={6}>
-              <TextField
-                margin="normal"
-                required
-                fullWidth
-                id="email"
-                label="VAT No"
-                name="email"
-                autoComplete="email"
-                autoFocus
-              />
-            </Grid>
-            <Grid item xs={6}>
-              <TextField
-                margin="normal"
-                required
-                fullWidth
-                id="email"
-                label="Tin No"
-                name="email"
-                autoComplete="email"
-                autoFocus
-              />
-            </Grid>
-            <Grid item xs={6}>
-              <Button variant="contained">Add Operation</Button>
-            </Grid>
-          </Grid>
+      {/* create dialog */}
+      <CustomeDialog
+        open={createOpen}
+        handleClose={handleCreateClose}
+        handleSubmit={handleCreate}
+        title={'Create Operation'}
+        submitText={'Create operation'}
+        cancelText={'cancel'}
+        formData={operationForm}
+      >
+        <Grid item xs={6} >
+          <Autocomplete
+            onChange={(event, newValue) => {
+              setNewCustomer(newValue);
+            }}
+            disablePortal
+            id="combo-box-demo"
+            options={customers}
+            sx={{ pt: 2 }}
+            renderInput={(params) => <TextField {...params} required label="customers" />}
+          />
+        </Grid>
+        <Grid item xs={6} >
+          <Autocomplete
+            onChange={(event, newValue) => {
+              setNewCommodity(newValue);
+            }}
+            disablePortal
+            id="combo-box-demo"
+            options={commodity}
+            sx={{ pt: 2 }}
+            renderInput={(params) => <TextField {...params} required label="commodity" />}
+          />
+        </Grid>
+        <Grid item xs={6} >
+          <Autocomplete
+            onChange={(event, newValue) => {
+              setNewPort(newValue);
+            }}
+            disablePortal
+            id="combo-box-demo"
+            options={ports}
+            sx={{ pt: 2 }}
+            renderInput={(params) => <TextField {...params} required label="load port" />}
+          />
+        </Grid>
+        <Grid item xs={6} >
+          <Autocomplete
+            value={ports && ports[0]?.PortName}
+            onChange={(event, newValue) => {
+              setDischargePort(newValue);
+            }}
+            disablePortal
+            id="combo-box-demo"
+            options={ports}
+            sx={{ pt: 2 }}
+            renderInput={(params) => <TextField {...params} required label="dischargePort" />}
+          />
+        </Grid>
+      </CustomeDialog>
+
+      {/* edit modal */}
+      <CustomeDialog
+        open={editOpen}
+        handleClose={handleEditClose}
+        handleSubmit={handleEdit}
+        title={'Update Operations'}
+        submitText={'update Operation'}
+        cancelText={'cancel'}
+        formData={operationForm}
+      >
+        <Grid item xs={6} >
+          <Autocomplete
+            value={editOprationData?.CustomerName}
+            onChange={(event, newValue) => {
+              setNewCustomer(newValue);
+            }}
+            disablePortal
+            id="combo-box-demo"
+            options={customers}
+            sx={{ pt: 2 }}
+            renderInput={(params) => <TextField {...params} required label="customers" />}
+          />
+        </Grid>
+        <Grid item xs={6} >
+          <Autocomplete
+            value={editOprationData?.CommodityName}
+            onChange={(event, newValue) => {
+              setNewCommodity(newValue);
+            }}
+            disablePortal
+            id="combo-box-demo"
+            options={commodity}
+            sx={{ pt: 2 }}
+            renderInput={(params) => <TextField {...params} required />}
+          />
+        </Grid>
+        <Grid item xs={6} >
+          <Autocomplete
+            value={editOprationData?.LoadPortName}
+            onChange={(event, newValue) => {
+              setNewPort(newValue);
+            }}
+            disablePortal
+            id="combo-box-demo"
+            options={ports}
+            sx={{ pt: 2 }}
+            renderInput={(params) => <TextField {...params} required label="load port" />}
+          />
+        </Grid>
+        <Grid item xs={6} >
+          <Autocomplete
+            value={editOprationData?.DischargePortName}
+            onChange={(event, newValue) => {
+              setDischargePort(newValue);
+            }}
+            disablePortal
+            id="combo-box-demo"
+            options={ports}
+            sx={{ pt: 2 }}
+            renderInput={(params) => <TextField {...params} required label="dischargePort" />}
+          />
+        </Grid>
+        <Grid item xs={6}>
+          <Autocomplete
+            value={editOprationData?.OperationStatus}
+            onChange={(event, newValue) => {
+              setOperationStatus(newValue);
+            }}
+            disablePortal
+            id="combo-box-demo"
+            name='operationStatus'
+            options={['Active', 'Cancelled', 'Completed']}
+            sx={{ pt: 2 }}
+            renderInput={(params) => <TextField {...params} name='operationStatus' label="Operation Status" />}
+          />
+        </Grid>
+      </CustomeDialog>
+
+      {/* delete modal */}
+      <Dialog onClose={handleDeleteClose} open={deleteOpen}>
+        <Box p={2}>
+          <Typography id="modal-modal-title" variant="h6" component="h2">
+            {deleteMessage}
+          </Typography>
+          <Box mt={2}>
+            <Button variant='contained' sx={{ mr: 2 }} onClick={handleDelete}>yes</Button>
+            <Button variant='contained' onClick={handleDeleteClose}>no</Button>
+          </Box>
         </Box>
       </Dialog>
     </Paper>

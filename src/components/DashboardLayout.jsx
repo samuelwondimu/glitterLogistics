@@ -27,12 +27,10 @@ import {
   Tooltip,
   useTheme,
 } from "@mui/material";
-import { useAuth } from "../App";
 import { LogoutOutlined } from "@mui/icons-material";
 import { useToggleTheme } from "../theme/useTheme";
 import GlitterLogo from "../assets/glitter-logo.jpg";
 import { getCurrenUser } from "../api/auth";
-import { useQuery } from "react-query";
 
 const drawerWidth = 240;
 
@@ -121,7 +119,6 @@ const Drawer = styled(MuiDrawer, {
 }));
 
 export default function DashboardLayout() {
-  let auth = useAuth();
   let navigate = useNavigate();
   const theme = useTheme();
   const changeTheme = useToggleTheme();

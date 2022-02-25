@@ -2,19 +2,15 @@ import React, { useEffect, useState } from "react";
 import { DataGrid, GridToolbarContainer } from "@mui/x-data-grid";
 import { useSnackbar } from 'notistack';
 import {
-  Box,
   Button,
   Dialog,
-  DialogTitle,
-  Grid,
   Paper,
-  TextField,
   Typography,
 } from "@mui/material";
 import { Add as AddIcon, DeleteOutline } from "@mui/icons-material";
 import { createCustomer, deleteCustomer, getCustomers, updateCustomer, updateDeactivate } from "../api/customers";
 import { useQuery } from "react-query";
-import Loading from "../components/Loading";
+import CustomeDialog from "../components/CustomDialog";
 
 export default function Customer() {
   const [customers, setCustomers] = useState('')
@@ -157,7 +153,6 @@ export default function Customer() {
       Email: data.get("Email"),
       TINNo: data.get("TINNo"),
     };
-    console.log(customer)
     createCustomer(customer, localStorage.getItem("token")).then((res) => {
       const responseMessage = res
       enqueueSnackbar(responseMessage.Message);
@@ -182,7 +177,6 @@ export default function Customer() {
       Email: data.get("Email"),
       TINNo: data.get("TINNo"),
     };
-    console.log(customer)
     updateCustomer(localStorage.getItem("token"), customer).then((res) => {
       const responseMessage = res
       enqueueSnackbar(responseMessage.Message);
@@ -195,7 +189,7 @@ export default function Customer() {
   };
 
   // delete customer
-  const handleDelete = async () => {
+  async function handleDelete() {
     await updateDeactivate(localStorage.getItem("token"), deleteCustomerdata?.id).then((res) => {
       const responseMessage = res
       enqueueSnackbar(responseMessage.Message);
@@ -205,7 +199,58 @@ export default function Customer() {
     handleDeleteClose();
   };
 
-  console.log(editCustomer)
+  const { isLoading, error, data, refetch } = useQuery('customers', () =>
+    getCustomers(localStorage.getItem("token")).then((res) => res)
+  )
+
+  const customerForm = [
+    {
+      label: 'Customer Name',
+      name: 'CustomerName',
+      defaultValue: editCustomer ? editCustomer?.CustomerName : ''
+    },
+    {
+      label: 'Customer Type',
+      name: 'CustomerType',
+      defaultValue: editCustomer ? editCustomer?.CustomerType : ''
+    },
+    {
+      label: 'Contact Persons',
+      name: 'ContactPersons',
+      defaultValue: editCustomer ? editCustomer?.ContactPersons : ''
+    },
+    {
+      label: 'Address',
+      name: 'Address',
+      defaultValue: editCustomer ? editCustomer?.Address : ''
+    },
+    {
+      label: 'Telephone1',
+      name: 'Telephone1',
+      defaultValue: editCustomer ? editCustomer?.Telephone1 : ''
+    },
+    {
+      label: 'Mobile',
+      name: 'Mobile',
+      defaultValue: editCustomer ? editCustomer?.Mobile : ''
+    },
+    {
+      label: 'VAT Reg No',
+      name: 'VATRegNo',
+      defaultValue: editCustomer ? editCustomer?.VATRegNo : ''
+    },
+    {
+      label: 'Email',
+      name: 'Email',
+      defaultValue: editCustomer ? editCustomer?.Email : ''
+    },
+    {
+      label: 'TIN No',
+      name: 'TINNo',
+      defaultValue: editCustomer ? editCustomer?.TINNo : ''
+    },
+  ]
+
   function addCustomerToolBar() {
     return (
       <GridToolbarContainer>
@@ -221,18 +266,11 @@ export default function Customer() {
     );
   }
 
-  const { isLoading, error, data, refetch } = useQuery('customers', () =>
-    getCustomers(localStorage.getItem("token")).then((res) => res)
-  )
-
   useEffect(() => {
     if (data) {
       setCustomers(data.map((customer) => ({ id: customer.CustomerID, ...customer })));
     };
   }, [data]);
-
-  console.log("CUSTOMERS", customers);
-
 
   if (error) return 'An error has occurred: ' + error.message
 
@@ -251,103 +289,27 @@ export default function Customer() {
         loading={isLoading}
         disableSelectionOnClick
       />
+      {/* create customer */}
+      <CustomeDialog
+        open={createOpen}
+        handleClose={handleCreateClose}
+        handleSubmit={handleCreate}
+        title={'Add A New Customer'}
+        submitText={'create customer'}
+        cancelText={'cancel'}
+        formData={customerForm}
+      />
 
-      <Dialog onClose={handleCreateClose} open={createOpen}>
-        <DialogTitle>Add A New Customer</DialogTitle>
-        <Box
-          component="form"
-          noValidate
-          onSubmit={handleCreate}
-          sx={{ px: 3, pb: 3 }}
-        >
-          <Grid container spacing={1}>
-            <Grid item xs={6}>
-              <TextField
-                margin="normal"
-                required
-                fullWidth
-                label="Customer Name"
-                name="CustomerName"
-              />
-            </Grid>
-            <Grid item xs={6}>
-              <TextField
-                margin="normal"
-                required
-                fullWidth
-                label="Customer Type"
-                name="CustomerType"
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                margin="normal"
-                required
-                fullWidth
-                label="Address"
-                name="Address"
-              />
-            </Grid>
-            <Grid item xs={6}>
-              <TextField
-                margin="normal"
-                required
-                fullWidth
-                label="Contact Person"
-                name="ContactPersons"
-              />
-            </Grid>
-            <Grid item xs={6}>
-              <TextField
-                margin="normal"
-                required
-                fullWidth
-                label="Telephone 1"
-                name="Telephone1"
-              />
-            </Grid>
-            <Grid item xs={6}>
-              <TextField
-                margin="normal"
-                required
-                fullWidth
-                label="E-mail"
-                name="Email"
-              />
-            </Grid>
-            <Grid item xs={6}>
-              <TextField
-                margin="normal"
-                required
-                fullWidth
-                label="mobile"
-                name="Mobile"
-              />
-            </Grid>
-            <Grid item xs={6}>
-              <TextField
-                margin="normal"
-                required
-                fullWidth
-                label="VAT REG No"
-                name="VATRegNo"
-              />
-            </Grid>
-            <Grid item xs={6}>
-              <TextField
-                margin="normal"
-                required
-                fullWidth
-                label="Tin No"
-                name="TINNo"
-              />
-            </Grid>
-            <Grid item xs={6}>
-              <Button type="submit" variant="contained">Add Customer</Button>
-            </Grid>
-          </Grid>
-        </Box>
-      </Dialog>
+      {/* edit modal */}
+      <CustomeDialog
+        open={editOpen}
+        handleClose={handleEditClose}
+        handleSubmit={handleEdit}
+        title={'Update Customer'}
+        submitText={'update customer'}
+        cancelText={'cancel'}
+        formData={customerForm}
+      />
       {/* delete modal */}
       <Dialog onClose={handleDeleteClose} open={openDelete}>
         <Typography id="modal-modal-title" variant="h6" component="h2">
@@ -355,116 +317,6 @@ export default function Customer() {
         </Typography>
         <Button variant='contained' sx={{ mr: 2 }} onClick={handleDelete}>yes</Button>
         <Button variant='contained' onClick={handleDeleteClose}>no</Button>
-      </Dialog>
-      {/* edit modal */}
-      <Dialog
-        open={editOpen}
-        onClose={handleEditClose}
-      >
-        <DialogTitle>Edit Customer</DialogTitle>
-
-        <Box
-          component="form"
-          noValidate
-          onSubmit={handleEdit}
-          sx={{ px: 3, pb: 3 }}
-        >
-          <Grid container spacing={1}>
-            <Grid item xs={6}>
-              <TextField
-                margin="normal"
-                required
-                fullWidth
-                label="Customer Name"
-                name="CustomerName"
-                defaultValue={editCustomer?.CustomerName}
-              />
-            </Grid>
-            <Grid item xs={6}>
-              <TextField
-                margin="normal"
-                required
-                fullWidth
-                label="Customer Type"
-                name="CustomerType"
-                defaultValue={editCustomer?.CustomerType}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                margin="normal"
-                required
-                fullWidth
-                label="Address"
-                name="Address"
-                defaultValue={editCustomer?.Address}
-              />
-            </Grid>
-            <Grid item xs={6}>
-              <TextField
-                margin="normal"
-                required
-                fullWidth
-                label="Contact Person"
-                name="ContactPersons"
-                defaultValue={editCustomer?.ContactPersons}
-              />
-            </Grid>
-            <Grid item xs={6}>
-              <TextField
-                margin="normal"
-                required
-                fullWidth
-                label="Telephone 1"
-                name="Telephone1"
-                defaultValue={editCustomer?.Telephone1}
-              />
-            </Grid>
-            <Grid item xs={6}>
-              <TextField
-                margin="normal"
-                required
-                fullWidth
-                label="E-mail"
-                name="Email"
-                defaultValue={editCustomer?.Email}
-              />
-            </Grid>
-            <Grid item xs={6}>
-              <TextField
-                margin="normal"
-                required
-                fullWidth
-                label="mobile"
-                name="Mobile"
-                defaultValue={editCustomer?.Mobile}
-              />
-            </Grid>
-            <Grid item xs={6}>
-              <TextField
-                margin="normal"
-                required
-                fullWidth
-                label="VAT REG No"
-                name="VATRegNo"
-                defaultValue={editCustomer?.VATRegNo}
-              />
-            </Grid>
-            <Grid item xs={6}>
-              <TextField
-                margin="normal"
-                required
-                fullWidth
-                label="Tin No"
-                name="TINNo"
-                defaultValue={editCustomer?.TINNo}
-              />
-            </Grid>
-            <Grid item xs={6}>
-              <Button type="submit" variant="contained">Edit Customer</Button>
-            </Grid>
-          </Grid>
-        </Box>
       </Dialog>
     </Paper>
   );
