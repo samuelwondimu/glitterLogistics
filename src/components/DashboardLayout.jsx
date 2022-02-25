@@ -18,6 +18,7 @@ import ListItemText from "@mui/material/ListItemText";
 import { blueGrey } from "@mui/material/colors";
 import { Link, Outlet } from "react-router-dom";
 import { navList } from "./navList";
+import { useNavigate } from "react-router-dom";
 import {
   Avatar,
   Button,
@@ -30,6 +31,8 @@ import { useAuth } from "../App";
 import { LogoutOutlined } from "@mui/icons-material";
 import { useToggleTheme } from "../theme/useTheme";
 import GlitterLogo from "../assets/glitter-logo.jpg";
+import { getCurrenUser } from "../api/auth";
+import { useQuery } from "react-query";
 
 const drawerWidth = 240;
 
@@ -119,11 +122,12 @@ const Drawer = styled(MuiDrawer, {
 
 export default function DashboardLayout() {
   let auth = useAuth();
+  let navigate = useNavigate();
   const theme = useTheme();
   const changeTheme = useToggleTheme();
   const [open, setOpen] = React.useState(true);
   const [anchorElUser, setAnchorElUser] = React.useState(null);
-
+  const [currentUser, setCurrentUser] = React.useState(null)
   const handleOpenUserMenu = (event) => {
     setAnchorElUser(event.currentTarget);
   };
@@ -131,6 +135,16 @@ export default function DashboardLayout() {
   const handleCloseUserMenu = () => {
     setAnchorElUser(null);
   };
+
+
+
+  React.useEffect(() => {
+    getCurrenUser(localStorage.getItem('token')).then((res) => {
+      setCurrentUser(res);
+    });
+  }, []);
+
+  console.log("CURRENT USER", currentUser)
 
   return (
     <Box sx={{ display: "flex" }}>
@@ -190,7 +204,7 @@ export default function DashboardLayout() {
                 <MenuItem>
                   <Avatar src={`R`} sx={{ mr: 1 }} />
                   <Typography color="GrayText">
-                    <b>{auth?.user?.username}</b> <br />
+                    <b>{currentUser?.UserName}</b> <br />
                   </Typography>
                 </MenuItem>
                 <Divider />
@@ -200,8 +214,9 @@ export default function DashboardLayout() {
                   fullWidth
                   onClick={() => {
                     handleCloseUserMenu();
-                    auth.signout();
-                  }}
+                    localStorage.removeItem("token");
+                    navigate('/')
+                   }}
                 >
                   <LogoutOutlined sx={{ mr: 2 }} />
                   <Typography textAlign="center" sx={{ textTransform: "none" }}>

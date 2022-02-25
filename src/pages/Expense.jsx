@@ -8,16 +8,19 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { DataGrid, GridToolbarContainer } from "@mui/x-data-grid";
 import {
   Add as AddIcon,
   DeleteOutline,
   EditOutlined,
 } from "@mui/icons-material";
+import { useQuery } from "react-query";
+import { getExpense } from "../api/Expense";
 
 export default function Expense() {
   const [open, setOpen] = useState(false);
+  const [expenses, setExpenses] = useState(null)
   const handleClickOpen = () => {
     setOpen(true);
   };
@@ -49,6 +52,18 @@ export default function Expense() {
     );
   }
 
+  const { isLoading, error, data } = useQuery('expense', () =>
+    getExpense(localStorage.getItem('token')).then((res) => res)
+  )
+
+  useEffect(() => {
+    if (data) {
+      setExpenses(data.map((expense) => ({ id: expense.ExpenseID, ...expense })));
+    };
+  }, [data]);
+
+  if (error) return 'An error has occurred: ' + error.message
+
   return (
     <Paper sx={{ p: 2 }}>
       <Typography fontWeight={"bold"} gutterBottom>
@@ -56,11 +71,12 @@ export default function Expense() {
       </Typography>
       <DataGrid
         style={{ minHeight: "68vh", border: "none" }}
-        rows={rows}
+        rows={expenses}
         columns={columns}
         components={{
           Toolbar: addCustomerToolBar,
         }}
+        loading={isLoading}
         pageSize={12}
         rowsPerPageOptions={[8]}
         disableSelectionOnClick
@@ -193,52 +209,5 @@ const columns = [
         </Button>
       </>
     ),
-  },
-];
-
-const rows = [
-  {
-    id: 1,
-    intAutoID: "Snow",
-    ExpenseID: "Jon",
-    OperationNumber: "35",
-    ServiceProviderID: "fksdjfksjdklf",
-    ExpenseDate: "fksdjfksjdklf",
-    Amount: "fksdjfksjdklf",
-    Remark: "fksdjfksjdklf",
-    UserID: "fksdjfksjdklf",
-  },
-  {
-    id: 2,
-    intAutoID: "Lannister",
-    ExpenseID: "Cersei",
-    OperationNumber: "42",
-    ServiceProviderID: "fksdjfksjdklf",
-    ExpenseDate: "fksdjfksjdklf",
-    Amount: "fksdjfksjdklf",
-    Remark: "fksdjfksjdklf",
-    UserID: "fksdjfksjdklf",
-  },
-  {
-    id: 3,
-    intAutoID: "Lannister",
-    ExpenseID: "Jaime",
-    OperationNumber: "45",
-    ServiceProviderID: "fksdjfksjdklf",
-    ExpenseDate: "fksdjfksjdklf",
-    Amount: "fksdjfksjdklf",
-    Remark: "fksdjfksjdklf",
-    UserID: "fksdjfksjdklf",
-  },
-  {
-    id: 4,
-    intAutoID: "Stark",
-    ExpenseID: "Arya",
-    OperationNumber: "16",
-    ServiceProviderID: "fksdjfksjdklf",
-    ExpenseDate: "fksdjfksjdklf",
-    Amount: "fksdjfksjdklf",
-    Remark: "fksdjfksjdklf",
-    UserID: "fksdjfksjdklf",
   },
 ];

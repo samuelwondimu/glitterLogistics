@@ -14,7 +14,9 @@ import {
   Typography,
 } from "@mui/material";
 import { DataGrid, GridToolbarContainer } from "@mui/x-data-grid";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { useQuery } from "react-query";
+import { getCommodity } from "../api/commodity";
 
 const columns = [
   { field: "id", headerName: "ID", width: 90 },
@@ -55,6 +57,7 @@ const columns = [
     ),
   },
 ];
+
 const rows = [
   {
     id: 1,
@@ -123,6 +126,7 @@ const rows = [
 
 export default function Commodity() {
   const [open, setOpen] = useState(false);
+  const [commodities, setCommodities] = useState(null);
   const handleClickOpen = () => {
     setOpen(true);
   };
@@ -153,6 +157,18 @@ export default function Commodity() {
     );
   }
 
+  const { isLoading, error, data } = useQuery('commodity', () =>
+    getCommodity(localStorage.getItem('token')).then((res) => res)
+  )
+
+  useEffect(() => {
+    if (data) {
+      setCommodities(data.map((commodity) => ({ id: commodity.CommodityID, ...commodity })));
+    };
+  }, [data]);
+
+  if (error) return 'An error has occurred: ' + error.message
+
   return (
     <>
       <Paper sx={{ p: 2 }}>
@@ -161,12 +177,13 @@ export default function Commodity() {
         </Typography>
         <DataGrid
           style={{ minHeight: "68vh", border: "none" }}
-          rows={rows}
+          rows={commodities}
           columns={columns}
           components={{
             Toolbar: addCustomerToolBar,
           }}
           pageSize={12}
+          loading={isLoading}
           rowsPerPageOptions={[8]}
           disableSelectionOnClick
         />

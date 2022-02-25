@@ -10,10 +10,13 @@ import {
   Typography,
 } from "@mui/material";
 import { DataGrid, GridToolbarContainer } from "@mui/x-data-grid";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { useQuery } from "react-query";
+import { getInvoice } from "../api/invoice";
 
 export default function Invoice() {
   const [open, setOpen] = useState(false);
+  const [invoices, setInvoices] = useState(null)
   const handleClickOpen = () => {
     setOpen(true);
   };
@@ -43,18 +46,31 @@ export default function Invoice() {
     );
   }
 
+  const { isLoading, error, data } = useQuery('invoice', () =>
+    getInvoice(localStorage.getItem('token')).then((res) => res)
+  )
+
+  useEffect(() => {
+    if (data) {
+      setInvoices(data.map((invoice) => ({ id: invoice.InvoiceNo, ...invoice })));
+    };
+  }, [data]);
+
+  if (error) return 'An error has occurred: ' + error.message
+
   return (
     <Paper sx={{ p: 2 }}>
       <Typography fontWeight={"bold"} gutterBottom>
-        Customers
+        Invoices
       </Typography>
       <DataGrid
         style={{ minHeight: "68vh", border: "none" }}
-        rows={rows}
+        rows={invoices}
         columns={columns}
         components={{
           Toolbar: addCustomerToolBar,
         }}
+        loading={isLoading}
         pageSize={7}
         rowsPerPageOptions={[8]}
         disableSelectionOnClick
@@ -128,18 +144,6 @@ export default function Invoice() {
   );
 }
 
-function createRow(data) {
-  return {
-    id: data.id,
-    InvoiceNo: data.InvoiceNo,
-    InvoiceDate: data.InvoiceDate,
-    OperationNumber: data.OperationNumber,
-    InvoiceAmount: data.InvoiceAmount,
-    Remark: data.Remark,
-    UserID: data.UserID,
-  };
-}
-
 const columns = [
   { field: "id", headerName: "ID", width: 90 },
   {
@@ -192,79 +196,4 @@ const columns = [
       </>
     ),
   },
-];
-
-const rows = [
-  createRow({
-    id: 231,
-    InvoiceNo: "938092",
-    InvoiceDate: "12-may-2021",
-    OperationNumber: "1281238182093",
-    InvoiceAmount: "32,233,829 Birr",
-    Remark: "Delivery fro Dubai Ports to Addis Abba through Kneyeahfasdj",
-    UserID: "hj9d9wdj1093duj109",
-  }),
-  createRow({
-    id: 2231,
-    InvoiceNo: "9332092",
-    InvoiceDate: "12-may-2021",
-    OperationNumber: "1281238182093",
-    InvoiceAmount: "32,233,829 Birr",
-    Remark: "Delivery fro Dubai Ports to Addis Abba through Kneyeahfasdj",
-    UserID: "hj9d9wdj1093duj109",
-  }),
-  createRow({
-    id: 2231,
-    InvoiceNo: "9332092",
-    InvoiceDate: "12-may-2021",
-    OperationNumber: "1281238182093",
-    InvoiceAmount: "32,233,829 Birr",
-    Remark: "Delivery fro Dubai Ports to Addis Abba through Kneyeahfasdj",
-    UserID: "hj9d9wdj1093duj109",
-  }),
-  createRow({
-    id: 2231,
-    InvoiceNo: "9332092",
-    InvoiceDate: "12-may-2021",
-    OperationNumber: "1281238182093",
-    InvoiceAmount: "32,233,829 Birr",
-    Remark: "Delivery fro Dubai Ports to Addis Abba through Kneyeahfasdj",
-    UserID: "hj9d9wdj1093duj109",
-  }),
-  createRow({
-    id: 2231,
-    InvoiceNo: "9332092",
-    InvoiceDate: "12-may-2021",
-    OperationNumber: "1281238182093",
-    InvoiceAmount: "32,233,829 Birr",
-    Remark: "Delivery fro Dubai Ports to Addis Abba through Kneyeahfasdj",
-    UserID: "hj9d9wdj1093duj109",
-  }),
-  createRow({
-    id: 2231,
-    InvoiceNo: "9332092",
-    InvoiceDate: "12-may-2021",
-    OperationNumber: "1281238182093",
-    InvoiceAmount: "32,233,829 Birr",
-    Remark: "Delivery fro Dubai Ports to Addis Abba through Kneyeahfasdj",
-    UserID: "hj9d9wdj1093duj109",
-  }),
-  createRow({
-    id: 21231,
-    InvoiceNo: "938092",
-    InvoiceDate: "12-may-2021",
-    OperationNumber: "1281238182093",
-    InvoiceAmount: "32,233,829 Birr",
-    Remark: "Delivery fro Dubai Ports to Addis Abba through Kneyeahfasdj",
-    UserID: "hj9d9wdj1093duj109",
-  }),
-  createRow({
-    id: 21231,
-    InvoiceNo: "938092",
-    InvoiceDate: "12-may-2021",
-    OperationNumber: "1281238182093",
-    InvoiceAmount: "32,233,829 Birr",
-    Remark: "Delivery fro Dubai Ports to Addis Abba through Kneyeahfasdj",
-    UserID: "hj9d9wdj1093duj109",
-  }),
 ];

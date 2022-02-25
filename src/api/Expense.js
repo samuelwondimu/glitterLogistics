@@ -1,8 +1,8 @@
 import { API_BASE } from "./base";
 
-// get invoice
-export async function getInvoice(token, id) {
-    const response = await fetch(`${API_BASE}/invoice/`, {
+// get expense
+export async function getExpense(token, id) {
+    const response = await fetch(`${API_BASE}/expense`, {
         method: 'GET',
         headers: {
             "Accept": "*/*",
@@ -14,16 +14,16 @@ export async function getInvoice(token, id) {
     return data;
 }
 
-// create invoice
-export async function createInvoice(invoice, token) {
+// create expense
+export async function createExpense(expense, token) {
     try {
-        const response = await fetch(`${API_BASE}/invoice`, {
+        const response = await fetch(`${API_BASE}/expense`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${token}`
             },
-            body: JSON.stringify(invoice)
+            body: JSON.stringify(expense)
         });
         const data = await response.json();
         return data;
@@ -33,16 +33,16 @@ export async function createInvoice(invoice, token) {
 }
 
 // update operations
-export async function updateInvoice(token, invoiceData) {
+export async function updateExpense(token, expenseData) {
     try {
-        const response = await fetch(`${API_BASE}/invoice`, {
+        const response = await fetch(`${API_BASE}/expense`, {
             method: 'PUT',
             headers: {
                 "Accept": "*/*",
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${token}`
             },
-            body: JSON.stringify(invoiceData)
+            body: JSON.stringify(expenseData)
         });
         const data = await response.json();
         return data;
@@ -52,9 +52,9 @@ export async function updateInvoice(token, invoiceData) {
 }
 
 // delete operations
-export async function deleteInvoice(token, id) {
+export async function deleteExpense(token, id) {
     try {
-        const response = await fetch(`${API_BASE}/invoice/${id}`, {
+        const response = await fetch(`${API_BASE}/expense/${id}`, {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json',
@@ -68,9 +68,9 @@ export async function deleteInvoice(token, id) {
     }
 }
 
-// update deactivate invoice
+// update deactivate expense
 export async function updateDeactivate(token, id) {
-    const response = await fetch(`${API_BASE}/invoice/deactivate/${id}`, {
+    const response = await fetch(`${API_BASE}/expense/deactivate/${id}`, {
         method: 'PUT',
         headers: {
             'Content-Type': 'application/json',

@@ -1,8 +1,8 @@
 import { API_BASE } from "./base";
 
-// get invoice
-export async function getInvoice(token, id) {
-    const response = await fetch(`${API_BASE}/invoice/`, {
+// get commodity
+export async function getCommodity(token, id) {
+    const response = await fetch(`${API_BASE}/commodity`, {
         method: 'GET',
         headers: {
             "Accept": "*/*",
@@ -14,16 +14,16 @@ export async function getInvoice(token, id) {
     return data;
 }
 
-// create invoice
-export async function createInvoice(invoice, token) {
+// create commodity
+export async function createCommodity(commodity, token) {
     try {
-        const response = await fetch(`${API_BASE}/invoice`, {
+        const response = await fetch(`${API_BASE}/commodity`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${token}`
             },
-            body: JSON.stringify(invoice)
+            body: JSON.stringify(commodity)
         });
         const data = await response.json();
         return data;
@@ -33,16 +33,16 @@ export async function createInvoice(invoice, token) {
 }
 
 // update operations
-export async function updateInvoice(token, invoiceData) {
+export async function updateCommodity(token, commodityData) {
     try {
-        const response = await fetch(`${API_BASE}/invoice`, {
+        const response = await fetch(`${API_BASE}/commodity`, {
             method: 'PUT',
             headers: {
                 "Accept": "*/*",
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${token}`
             },
-            body: JSON.stringify(invoiceData)
+            body: JSON.stringify(commodityData)
         });
         const data = await response.json();
         return data;
@@ -52,9 +52,9 @@ export async function updateInvoice(token, invoiceData) {
 }
 
 // delete operations
-export async function deleteInvoice(token, id) {
+export async function deleteCommodity(token, id) {
     try {
-        const response = await fetch(`${API_BASE}/invoice/${id}`, {
+        const response = await fetch(`${API_BASE}/commodity/${id}`, {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json',
@@ -68,9 +68,9 @@ export async function deleteInvoice(token, id) {
     }
 }
 
-// update deactivate invoice
+// update deactivate commodity
 export async function updateDeactivate(token, id) {
-    const response = await fetch(`${API_BASE}/invoice/deactivate/${id}`, {
+    const response = await fetch(`${API_BASE}/commodity/deactivate/${id}`, {
         method: 'PUT',
         headers: {
             'Content-Type': 'application/json',

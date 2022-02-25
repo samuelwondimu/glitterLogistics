@@ -11,10 +11,14 @@ export function login(username, password) {
         body: JSON.stringify(data),
         headers: headersList
     }).then(response => response.text()).then(data => {
-        localStorage.setItem("token", data);
-        const token = localStorage.getItem("token");
-        console.log("TOKEN", token);
-        return token
+        if (data === 'User Not Found') {
+            alert('User Not Found');
+        } else {
+            localStorage.setItem("token", data);
+            const token = localStorage.getItem("token");
+            console.log("TOKEN", token);
+        }
+        return data;
     });
 }
 
