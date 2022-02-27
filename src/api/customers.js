@@ -39,6 +39,8 @@ export async function getCustomers(token) {
     return data;
 }
 
+
+
 export async function updateCustomer(token, customerData) {
     try {
         const response = await fetch(`${API_BASE}/customer`, {

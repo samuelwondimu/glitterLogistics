@@ -7,6 +7,7 @@ import {
   Grid,
   IconButton,
   Paper,
+  Stack,
   TextField,
   Typography,
 } from "@mui/material";
@@ -54,8 +55,6 @@ export default function Operations() {
   const [deleteMessage, setDeleteMessage] = useState('');
   const handleDeleteOpen = () => setDeleteOpen(true);
   const handleDeleteClose = () => setDeleteOpen(false);
-
-
 
   const columns = [
     {
@@ -176,22 +175,6 @@ export default function Operations() {
 
   if (error) return 'An error has occurred: ' + error.message
 
-  function addCustomerToolBar() {
-    return (
-      <GridToolbarContainer>
-        <Button
-          color="primary"
-          startIcon={<Add />}
-          variant="contained"
-          sx={{ textTransform: "none" }}
-          onClick={handleCreateOpen}
-        >
-          New Operation
-        </Button>
-      </GridToolbarContainer>
-    );
-  }
-
   async function handleCreate(event) {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
@@ -280,31 +263,47 @@ export default function Operations() {
   const requestSearch = (searchValue) => {
     setSearchText(searchValue);
     const searchRegex = new RegExp(escapeRegExp(searchValue), 'i');
-    const filteredRows = data.rows.filter((row) => {
+    const filteredRows = operations.filter((row) => {
       return Object.keys(row).some((field) => {
         return searchRegex.test(row[field].toString());
       });
     });
     setOperations(filteredRows);
+    if (searchValue === '') setOperations(operations)
   };
 
   return (
     <Paper sx={{ p: 2 }}>
-      <Typography fontWeight={"bold"} gutterBottom>
-        Operations
-      </Typography>
+      <Stack direction='row' alignItems={'center'} justifyContent='space-between'>
+        <Typography fontWeight={"bold"} gutterBottom>
+          Operations
+        </Typography>
+        <Button
+          color="primary"
+          startIcon={<Add />}
+          variant="contained"
+          sx={{ textTransform: "none" }}
+          onClick={handleCreateOpen}
+        >
+          New Operation
+        </Button>
+      </Stack>
+
       <DataGrid
         style={{ minHeight: "68vh", border: "none" }}
         rows={operations}
         columns={columns}
         components={{
-          Toolbar: addCustomerToolBar,
+          Toolbar: QuickSearchToolbar,
         }}
         componentsProps={{
           toolbar: {
             value: searchText,
             onChange: (event) => requestSearch(event.target.value),
-            clearSearch: () => requestSearch(''),
+            clearSearch: () => {
+              requestSearch('')
+              refetch()
+            },
           }
         }}
         loading={isLoading}
@@ -465,7 +464,6 @@ export default function Operations() {
   );
 }
 
-const VISIBLE_FIELDS = ['CustomerName', 'LoadPortName', 'DischargePortName', 'OperationType'];
 
 function escapeRegExp(value) {
   return value.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');

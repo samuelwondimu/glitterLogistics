@@ -45,6 +45,7 @@ import { getCurrenUser } from "../api/auth";
 import { getCustomers } from "../api/customers";
 import { getOperations } from "../api/operation";
 import { getReports } from "../api/report";
+import { getHomeCustomers, getHomeServiceProvider, getHomeOperationData } from '../api/home';
 import { getServceProvider } from "../api/serviceprovider";
 import { createTodoapi, getTodos, updateTodoapi } from "../api/todo";
 import CustomeDialog from "../components/CustomDialog";
@@ -151,13 +152,13 @@ export default function Dashboard() {
   }, [])
 
   useEffect(() => {
-    getOperations(localStorage.getItem('token')).then((res) => res).then(res => {
+    getHomeOperationData(localStorage.getItem('token')).then((res) => res).then(res => {
       setOperations(res);
     });
-    getCustomers(localStorage.getItem("token")).then((res) => res).then((res) => {
+    getHomeCustomers(localStorage.getItem("token")).then((res) => res).then((res) => {
       setCustomers(res);
     });
-    getServceProvider(localStorage.getItem("token")).then((res) => res).then((res) => {
+    getHomeServiceProvider(localStorage.getItem("token")).then((res) => res).then((res) => {
       setServiceProviders(res);
     })
   }, []);
@@ -257,13 +258,13 @@ export default function Dashboard() {
               <Table aria-label="simple table">
                 <TableHead>
                   <TableRow>
-                    <StyledTableCell>Operation Type</StyledTableCell>
+                    <StyledTableCell>OperationNumber</StyledTableCell>
                     <StyledTableCell >
                       Customer Name
                     </StyledTableCell>
+                    <StyledTableCell >CommodityName</StyledTableCell>
                     <StyledTableCell >Load Port Name</StyledTableCell>
                     <StyledTableCell >Discharge Port Name</StyledTableCell>
-                    <StyledTableCell >Remark</StyledTableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -275,12 +276,12 @@ export default function Dashboard() {
                       <StyledTableCell >
                         {row.CustomerName}
                       </StyledTableCell>
+                      <StyledTableCell >
+                        {row.CommodityName}
+                      </StyledTableCell>
                       <StyledTableCell >{row.LoadPortName}</StyledTableCell>
                       <StyledTableCell >
                         {row.DischargePortName}
-                      </StyledTableCell>
-                      <StyledTableCell >
-                        {row.Remark}
                       </StyledTableCell>
                     </StyledTableRow>
                   ))}
@@ -298,30 +299,26 @@ export default function Dashboard() {
               <Table aria-label="simple table">
                 <TableHead>
                   <TableRow>
-                    <StyledTableCell>Customer Type</StyledTableCell>
                     <StyledTableCell >Customer Name</StyledTableCell>
-                    <StyledTableCell >Address</StyledTableCell>
+                    <StyledTableCell >Collected Amount</StyledTableCell>
                     <StyledTableCell >
-                      Mobile
+                      Balance
                     </StyledTableCell>
-                    <StyledTableCell >VATRegNo</StyledTableCell>
+                    <StyledTableCell >InvoiceAmount</StyledTableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
                   {customers?.map((row, i) => (
                     <StyledTableRow key={i}>
-                      <StyledTableCell component="th" scope="row">
-                        {row.CustomerType}
-                      </StyledTableCell>
                       <StyledTableCell >
                         {row.CustomerName}
                       </StyledTableCell>
-                      <StyledTableCell >{row.Address}</StyledTableCell>
+                      <StyledTableCell >{row.CollectedAmount}</StyledTableCell>
                       <StyledTableCell >
-                        {row.Mobile}
+                        {row.Balance}
                       </StyledTableCell>
                       <StyledTableCell >
-                        {row.VATRegNo}
+                        {row.InvoiceAmount}
                       </StyledTableCell>
                     </StyledTableRow>
                   ))}
@@ -340,12 +337,11 @@ export default function Dashboard() {
                 <TableHead>
                   <TableRow>
                     <StyledTableCell>Service Provider Name</StyledTableCell>
-                    <StyledTableCell >Service Type</StyledTableCell>
-                    <StyledTableCell >Mobile</StyledTableCell>
+                    <StyledTableCell >Expense Amount</StyledTableCell>
+                    <StyledTableCell >Paid Amount</StyledTableCell>
                     <StyledTableCell >
-                      Address
+                      Balance
                     </StyledTableCell>
-                    <StyledTableCell >VAT Reg No</StyledTableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -355,14 +351,11 @@ export default function Dashboard() {
                         {row.ServiceProviderName}
                       </StyledTableCell>
                       <StyledTableCell >
-                        {row.ServiceType}
+                        {row.ExpenseAmount}
                       </StyledTableCell>
-                      <StyledTableCell >{row.Mobile}</StyledTableCell>
+                      <StyledTableCell >{row.PaidAmount}</StyledTableCell>
                       <StyledTableCell >
-                        {row.Address}
-                      </StyledTableCell>
-                      <StyledTableCell >
-                        {row.VATRegNo}
+                        {row.Balance}
                       </StyledTableCell>
                     </StyledTableRow>
                   ))}
