@@ -1,7 +1,10 @@
 import {
+  Autocomplete,
   Button,
   Dialog,
+  Grid,
   Paper,
+  TextField,
   Typography,
 } from "@mui/material";
 import React, { useEffect, useState } from "react";
@@ -12,11 +15,25 @@ import {
   EditOutlined,
 } from "@mui/icons-material";
 import { useQuery } from "react-query";
-import { getExpense } from "../api/Expense";
+import { createExpense, deleteExpense, getExpense, getExpenseList, updateDeactivate, updateExpense } from "../api/Expense";
 import CustomeDialog from "../components/CustomDialog";
+import { useSnackbar } from "notistack";
+import { getCustomers, } from "../api/customers";
+import { getServceProvider } from "../api/serviceprovider";
+import { getOperations } from "../api/operation";
 
 export default function Expense() {
   const [expenses, setExpenses] = useState(null)
+  const [customers, setCustomers] = useState(null);
+  const [newCustomer, setNewCustomer] = useState(null);
+  const [newServiceProvider, setNewServiceProvider] = useState(null);
+  const [serviceProvider, setServiceProvider] = useState(null);
+  const [expenseList, setExpenseList] = useState(null);
+  const [newExpenseList, setNewExpenseList] = useState(null);
+  const [operations, setOperations] = useState(null);
+  const [newOperation, setNewOperation] = useState(null);
+  const { enqueueSnackbar } = useSnackbar();
+
   // handle create customer
   const [createOpen, setCreateOpen] = useState(false);
   const handleCreateOpen = () => setCreateOpen(true);
@@ -41,13 +58,46 @@ export default function Expense() {
   async function handleCreate(event) {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
-    console.log(data);
+    const expense = {
+      // CustomerID: await newCustomer?.id,
+      // CustomerName: await newCustomer?.label,
+      ServiceProviderID: await newServiceProvider?.id,
+      ServiceProviderName: await newServiceProvider?.label,
+      ExpenseID: await newExpenseList?.id,
+      ExpenseDescription: await newExpenseList?.label,
+      ExpenseDate: new Date(Date.now()),
+      ExpenseAmount: data.get("ExpenseAmount"),
+      OperationNumber: await newOperation?.id,
+      Remark: data.get("Remark"),
+    }
+    console.log(expense)
+    await createExpense(expense, localStorage.getItem("token")).then((res) => res).then((res) => {
+      const responseMessage = res;
+      enqueueSnackbar(responseMessage.Message, { variant: "success" });
+      refetch();
+    });
   }
 
   async function handleEdit(event) {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
-    console.log(data);
+    const expense = {
+      intAutoID: editExpense.intAutoID,
+      ServiceProviderID: editExpense?.ExpenseID,
+      ServiceProviderName: editExpense?.ServiceProviderName,
+      ExpenseID: editExpense?.ExpenseID,
+      ExpenseDescription: editExpense?.ExpenseDescription,
+      ExpenseDate: new Date(Date.now()),
+      ExpenseAmount: data.get("ExpenseAmount"),
+      OperationNumber: editExpense?.OperationNumber,
+      Remark: data.get("Remark"),
+    };
+    await updateExpense(localStorage.getItem("token"), expense).then((res) => res).then((res) => {
+      const responseMessage = res;
+      enqueueSnackbar(responseMessage.Message, { variant: "success" });
+      refetch();
+    });
+    setEditOpen(false);
   }
 
   async function handleDelete() { }
@@ -72,46 +122,16 @@ export default function Expense() {
 
   const expenseForm = [
     {
-      field: "OperationNumber",
-      headerName: 'Operation Number',
-      defaultValue: deleteExpensedata ? deleteExpensedata?.OperationNumber : ''
+      label: "ExpenseAmount",
+      name: 'ExpenseAmount',
+      defaultValue: editExpense ? editExpense?.Amount : ''
     },
     {
-      field: "OperationNumber",
-      headerName: 'Operation Number',
-      defaultValue: deleteExpensedata ? deleteExpensedata?.OperationNumber : ''
-    },
-    {
-      field: "OperationNumber",
-      headerName: 'Operation Number',
-      defaultValue: deleteExpensedata ? deleteExpensedata?.OperationNumber : ''
-    },
-    {
-      field: "OperationNumber",
-      headerName: 'Operation Number',
-      defaultValue: deleteExpensedata ? deleteExpensedata?.OperationNumber : ''
-    },
-    {
-      field: "OperationNumber",
-      headerName: 'Operation Number',
-      defaultValue: deleteExpensedata ? deleteExpensedata?.OperationNumber : ''
-    }, {
-      field: "OperationNumber",
-      headerName: 'Operation Number',
-      defaultValue: deleteExpensedata ? deleteExpensedata?.OperationNumber : ''
+      label: "Remark",
+      name: 'Remark',
+      defaultValue: editExpense ? editExpense?.Remark : ''
     }
   ]
-
-  const { isLoading, error, data } = useQuery('expense', () =>
-    getExpense(localStorage.getItem('token')).then((res) => res)
-  )
-
-  useEffect(() => {
-    if (data) {
-      setExpenses(data.map((expense) => ({ id: expense.ExpenseID, ...expense })));
-    };
-  }, [data]);
-
 
   const columns = [
     {
@@ -158,24 +178,69 @@ export default function Expense() {
       field: "createdAt",
       headerName: "Actions",
       width: 250,
-      renderCell: (params) => (
-        <>
-          <Button
-            variant="contained"
-            startIcon={<EditOutlined />}
-            sx={{ mr: 1 }}
-            color="success"
-          >
-            Edit
-          </Button>
-          <Button variant="contained" startIcon={<DeleteOutline />} color="error">
-            Delete
-          </Button>
-        </>
-      ),
+      renderCell: (params) => {
+        async function handleDelete() {
+          await deleteExpense(localStorage.getItem("token"), params.row.intAutoID).then(res => {
+            const responseMessage = res;
+            enqueueSnackbar(responseMessage.Message, {
+              variant: "success",
+            });
+            refetch();
+          })
+        }
+
+        async function handleEdit() {
+          const rowData = params.row;
+          setEditExpense(rowData);
+          handleEditOpen();
+        }
+        return (
+          <>
+            <Button
+              variant="contained"
+              startIcon={<EditOutlined />}
+              sx={{ mr: 1 }}
+              color="success"
+              onClick={handleEdit}
+            >
+              Edit
+            </Button>
+            <Button variant="contained" startIcon={<DeleteOutline />} color="error" onClick={handleDelete}>
+              Delete
+            </Button>
+          </>
+        );
+      },
     },
   ];
 
+  const { isLoading, error, data, refetch } = useQuery('expense', () =>
+    getExpense(localStorage.getItem('token')).then((res) => res)
+  )
+
+  useEffect(() => {
+    if (data) {
+      setExpenses(data.map((expense, i) => ({ id: i, ...expense })));
+    };
+
+    getCustomers(localStorage.getItem("token")).then((res) => res).then((res) => {
+      setCustomers(res.map((customer) => ({ id: customer.CustomerID, label: customer.CustomerName })));
+    });
+
+    getOperations(localStorage.getItem("token")).then((res) => res).then((res) => {
+      setOperations(res.map((operation) => ({ id: operation.OperationNumber, label: operation.OperationNumber })));
+    });
+
+    getServceProvider(localStorage.getItem("token")).then((res) => res).then((res) => {
+      setServiceProvider(res.map((serviceProvider) => ({ id: serviceProvider.ServiceProviderID, label: serviceProvider.ServiceProviderName })));
+    });
+
+    getExpenseList(localStorage.getItem("token")).then((res) => res).then((res) => {
+      setExpenseList(res.map((expense) => ({ id: expense.ExpenseID, label: expense.ExpenseDescription })));
+      console.log("Expense List", res)
+    });
+
+  }, [data]);
 
   if (error) return 'An error has occurred: ' + error.message
 
@@ -205,7 +270,44 @@ export default function Expense() {
         submitText={'create commodity'}
         cancelText={'cancel'}
         formData={expenseForm}
-      />
+      >
+        <Grid item xs={6} >
+          <Autocomplete
+            onChange={(event, newValue) => {
+              setNewOperation(newValue);
+            }}
+            disablePortal
+            id="combo-box-demo"
+            options={operations}
+            sx={{ pt: 2 }}
+            renderInput={(params) => <TextField {...params} required label="operations" />}
+          />
+        </Grid>
+        <Grid item xs={6} >
+          <Autocomplete
+            onChange={(event, newValue) => {
+              setNewExpenseList(newValue);
+            }}
+            disablePortal
+            id="combo-box-demo"
+            options={expenseList}
+            sx={{ pt: 2 }}
+            renderInput={(params) => <TextField {...params} required label="Expense List" />}
+          />
+        </Grid>
+        <Grid item xs={6} >
+          <Autocomplete
+            onChange={(event, newValue) => {
+              setNewServiceProvider(newValue);
+            }}
+            disablePortal
+            id="combo-box-demo"
+            options={serviceProvider}
+            sx={{ pt: 2 }}
+            renderInput={(params) => <TextField {...params} required label="service provider" />}
+          />
+        </Grid>
+      </CustomeDialog>
 
       {/* edit modal */}
       <CustomeDialog
@@ -216,7 +318,50 @@ export default function Expense() {
         submitText={'update commodity'}
         cancelText={'cancel'}
         formData={expenseForm}
-      />
+      >
+        <Grid item xs={6} >
+          <Autocomplete
+            value={editExpense?.OperationNumber}
+            onChange={(event, newValue) => {
+              setNewOperation(newValue);
+              editExpense.OperationNumber = newValue.id;
+            }}
+            disablePortal
+            id="combo-box-demo"
+            options={operations}
+            sx={{ pt: 2 }}
+            renderInput={(params) => <TextField {...params} required label="operations" />}
+          />
+        </Grid>
+        <Grid item xs={6} >
+          <Autocomplete
+            value={editExpense?.ExpenseDescription}
+            onChange={(event, newValue) => {
+              setNewExpenseList(newValue);
+              editExpense.ExpenseDescription = newValue.label;
+            }}
+            disablePortal
+            id="combo-box-demo"
+            options={expenseList}
+            sx={{ pt: 2 }}
+            renderInput={(params) => <TextField {...params} required label="Expense List" />}
+          />
+        </Grid>
+        <Grid item xs={6} >
+          <Autocomplete
+            value={editExpense?.ServiceProviderID}
+            onChange={(event, newValue) => {
+              setNewServiceProvider(newValue);
+              editExpense.ServiceProviderID = newValue.id;
+            }}
+            disablePortal
+            id="combo-box-demo"
+            options={serviceProvider}
+            sx={{ pt: 2 }}
+            renderInput={(params) => <TextField {...params} required label="service provider" />}
+          />
+        </Grid>
+      </CustomeDialog>
 
       {/* delete */}
       <Dialog onClose={handleDeleteClose} open={openDelete}>

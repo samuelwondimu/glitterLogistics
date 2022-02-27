@@ -1,66 +1,27 @@
 import {
-  Add as AddIcon,
+  Add,
   DeleteOutline,
   EditOutlined,
 } from "@mui/icons-material";
 import {
-  Box,
   Button,
   Dialog,
+  DialogActions,
   DialogTitle,
-  Grid,
   Paper,
-  TextField,
   Typography,
 } from "@mui/material";
 import { DataGrid, GridToolbarContainer } from "@mui/x-data-grid";
+import { useSnackbar } from "notistack";
 import React, { useEffect, useState } from "react";
 import { useQuery } from "react-query";
-import { getCommodity } from "../api/commodity";
+import { createCommodity, deleteCommodity, getCommodity, updateCommodity, updateConfirmDelete } from "../api/commodity";
 import CustomeDialog from "../components/CustomDialog";
 
-const columns = [
-  { field: "id", headerName: "ID", width: 90 },
-  {
-    field: "CommodityName",
-    headerName: "Commodity name",
-    width: 150,
-    editable: true,
-  },
-  {
-    field: "Category",
-    headerName: "Category",
-    width: 150,
-  },
-  {
-    filed: "HsCode",
-    headerName: "HS Code",
-    width: 150,
-  },
-  {
-    field: "createdAt",
-    headerName: "Actions",
-    width: 250,
-    renderCell: (params) => (
-      <>
-        <Button
-          variant="contained"
-          startIcon={<EditOutlined />}
-          sx={{ mr: 1 }}
-          color="success"
-        >
-          Edit
-        </Button>
-        <Button variant="contained" startIcon={<DeleteOutline />} color="error">
-          Delete
-        </Button>
-      </>
-    ),
-  },
-];
-
 export default function Commodity() {
-  const [commodities, setCommodities] = useState(null);
+  const [commodities, setCommodities] = useState([]);
+  const { enqueueSnackbar } = useSnackbar();
+
 
   // handle create customer
   const [createOpen, setCreateOpen] = useState(false);
@@ -83,37 +44,67 @@ export default function Commodity() {
     setEditCommodity(null);
   };
 
-  async function handleCreate(event) {
-    event.preventDefault();
-    const data = new FormData(event.currentTarget);
-    console.log(data);
-  }
+  const columns = [
+    { field: "id", headerName: "ID", width: 90 },
+    {
+      field: "CommodityName",
+      headerName: "Commodity name",
+      width: 150,
+    },
+    {
+      field: "Category",
+      headerName: "Category",
+      width: 150,
+    },
+    {
+      field: "HSCode",
+      headerName: "HS Code",
+      width: 150,
+    },
+    {
+      field: "createdAt",
+      headerName: "Actions",
+      width: 250,
+      renderCell: (params) => {
+        async function handleDelete() {
+          const rowData = params.row;
+          await deleteCommodity(localStorage.getItem('token'), params.row.CommodityID).then(res => {
+            const responseMessage = res
+            if (responseMessage.ID === 2) {
+              setDeleteCommoditydata(rowData);
+              handleDeleteOpen();
+              setDeleteMessage(responseMessage.Message)
+            } else if (responseMessage.ID === 0) {
+              enqueueSnackbar(responseMessage.Message);
+              refetch();
+            }
+          })
+        }
+        async function handleEdit() {
+          const rowData = params.row;
+          setEditCommodity(rowData);
+          handleEditOpen();
+        }
+        return (
+          <>
+            <Button
+              variant="contained"
+              startIcon={<EditOutlined />}
+              sx={{ mr: 1 }}
+              color="success"
+              onClick={handleEdit}
+            >
+              Edit
+            </Button>
+            <Button variant="contained" startIcon={<DeleteOutline />} color="error" onClick={handleDelete}>
+              Delete
+            </Button>
+          </>
+        )
+      }
+    },
+  ];
 
-  async function handleEdit(event) {
-    event.preventDefault();
-    const data = new FormData(event.currentTarget);
-    console.log(data);
-  }
-
-  async function handleDelete() { }
-
-  function addCommodityToolBar() {
-    return (
-      <GridToolbarContainer>
-        <Button
-          color="primary"
-          startIcon={<AddIcon />}
-          variant="contained"
-          onClick={handleCreateOpen}
-          components={{
-            Toolbar: addCommodityToolBar,
-          }}
-        >
-          Add Commodity
-        </Button>
-      </GridToolbarContainer>
-    );
-  }
 
   const commodityForm = [
     {
@@ -129,17 +120,81 @@ export default function Commodity() {
     {
       label: 'HS Code',
       name: 'HsCode',
-      defaultValue: editCommodity ? editCommodity?.HsCode : ''
+      defaultValue: editCommodity ? editCommodity?.HSCode : ''
     }
   ]
 
-  const { isLoading, error, data } = useQuery('commodity', () =>
+  const { isLoading, error, data, refetch } = useQuery('commodity', () =>
     getCommodity(localStorage.getItem('token')).then((res) => res)
   )
 
+  function addToolBar() {
+    return (
+      <GridToolbarContainer>
+        <Button
+          color="primary"
+          startIcon={<Add />}
+          variant="contained"
+          sx={{ textTransform: "none" }}
+          onClick={handleCreateOpen}
+        >
+          New Commodity Provider
+        </Button>
+      </GridToolbarContainer>
+    );
+  }
+
   useEffect(() => {
-    setCommodities(data?.map((commodity) => ({ id: commodity.CommodityID, ...commodity })));
+    if (data) {
+      console.log("Commodoity", data?.map((commodity, i) => ({ id: i, HSCode: commodity.HSCode, ...commodity })))
+      setCommodities(data?.map((commodity, i) => ({ id: i, HSCode: commodity.HSCode, ...commodity })));
+    }
   }, [data]);
+
+  async function handleCreate(event) {
+    event.preventDefault();
+    setEditCommodity(null);
+    const data = new FormData(event.target);
+    const commodity = {
+      CommodityName: data.get("CommodityName"),
+      Category: data.get("Category"),
+      HSCode: data.get("HsCode"),
+    };
+
+    createCommodity(commodity, localStorage.getItem('token')).then((res) => res).then(res => {
+      const responseMessage = res;
+      enqueueSnackbar(responseMessage.Message, { variant: 'success' });
+      refetch()
+    })
+    setCreateOpen(false);
+  }
+
+  async function handleEdit(event) {
+    event.preventDefault();
+    const data = new FormData(event.currentTarget);
+    const commodity = {
+      CommodityID: editCommodity?.CommodityID,
+      CommodityName: data.get("CommodityName"),
+      Category: data.get("Category"),
+      HSCode: data.get("HsCode"),
+    };
+    await updateCommodity(localStorage.getItem('token'), commodity).then((res) => res).then(res => {
+      const responseMessage = res;
+      enqueueSnackbar(responseMessage.Message, { variant: 'success' });
+      refetch()
+    })
+    setEditCommodity(null);
+    setEditOpen(false);
+  }
+
+  async function handleDelete() {
+    await updateConfirmDelete(localStorage.getItem("token"), deleteCommoditydata?.CommodityID).then((res) => {
+      const responseMessage = res
+      enqueueSnackbar(responseMessage.Message);
+      refetch();
+    })
+    setOpenDelete(false);
+  }
 
   if (error) return 'An error has occurred: ' + error.message
 
@@ -149,19 +204,19 @@ export default function Commodity() {
         <Typography fontWeight={"bold"} gutterBottom>
           Commodity
         </Typography>
+
         <DataGrid
           style={{ minHeight: "68vh", border: "none" }}
           rows={commodities}
           columns={columns}
           components={{
-            Toolbar: addCommodityToolBar,
+            Toolbar: addToolBar,
           }}
           pageSize={12}
           loading={isLoading}
           rowsPerPageOptions={[8]}
           disableSelectionOnClick
         />
-        {/* create commodity */}
         <CustomeDialog
           open={createOpen}
           handleClose={handleCreateClose}
@@ -185,11 +240,13 @@ export default function Commodity() {
 
         {/* delete */}
         <Dialog onClose={handleDeleteClose} open={openDelete}>
-          <Typography id="modal-modal-title" variant="h6" component="h2">
+          <DialogTitle >
             {deleteMessage}
-          </Typography>
-          <Button variant='contained' sx={{ mr: 2 }} onClick={handleDelete}>yes</Button>
-          <Button variant='contained' onClick={handleDeleteClose}>no</Button>
+          </DialogTitle>
+          <DialogActions>
+            <Button variant='contained' sx={{ mr: 2 }} onClick={handleDelete}>yes</Button>
+            <Button variant='contained' onClick={handleDeleteClose}>no</Button>
+          </DialogActions>
         </Dialog>
       </Paper>
     </>

@@ -15,7 +15,7 @@ import { useSnackbar } from "notistack";
 import React, { useEffect, useState } from "react";
 import { useQuery } from "react-query";
 import { getCustomers } from "../api/customers";
-import { createInvoice, getInvoice } from "../api/invoice";
+import { createInvoice, getInvoice, updateInvoice, deleteInvoice } from "../api/invoice";
 import { getOperations } from "../api/operation";
 import CustomeDialog from "../components/CustomDialog";
 
@@ -85,7 +85,15 @@ export default function Invoice() {
       headerName: "Actions",
       width: 250,
       renderCell: (params) => {
-        async function handleDelete() { }
+        async function handleDelete() {
+          await deleteInvoice(localStorage.getItem("token"), params.row.InvoiceNo).then(res => {
+            const responseMessage = res;
+            enqueueSnackbar(responseMessage.Message, {
+              variant: "success",
+            });
+            refetch();
+          })
+        }
 
         async function handleEdit() {
           const rowData = params.row;
@@ -94,7 +102,6 @@ export default function Invoice() {
         }
 
         return (
-
           <>
             <Button
               variant="contained"
@@ -136,7 +143,7 @@ export default function Invoice() {
 
   useEffect(() => {
     if (data) {
-      setInvoices(data.map((invoice) => ({ id: invoice.InvoiceNo, ...invoice })));
+      setInvoices(data.map((invoice, i) => ({ id: i, ...invoice })));
     };
     getCustomers(localStorage.getItem("token")).then((res) => res).then((res) => {
       setCustomers(res.map((customer) => ({ id: customer.CustomerID, label: customer.CustomerName })));
@@ -158,15 +165,37 @@ export default function Invoice() {
       InvoiceAmount: data.get("InvoiceAmount"),
       Remark: data.get("Remark"),
     }
-    console.log(invoice)
+    // console.log(invoice)
     await createInvoice(invoice, localStorage.getItem("token")).then((res) => res).then((res) => {
       const responseMessage = res;
-      enqueueSnackbar(responseMessage.message, { variant: "success" });
+      enqueueSnackbar(responseMessage.Message, { variant: "success" });
       refetch();
-      setCreateOpen(false);
     });
+    setCreateOpen(false);
   }
-  async function handleEdit() { }
+
+  async function handleEdit(event) {
+    event.preventDefault();
+    const data = new FormData(event.currentTarget);
+    const operation = {
+      InvoiceNo: data.get("InvoiceNo"),
+      CustomerID: editInvoice?.CustomerID,
+      CustomerName: editInvoice?.CustomerName,
+      OperationNumber: editInvoice?.OperationNumber,
+      InvoiceDate: new Date(Date.now()),
+      InvoiceAmount: data.get("InvoiceAmount"),
+      Remark: data.get("Remark"),
+    }
+
+    await updateInvoice(localStorage.getItem('token'), operation).then(res => {
+      const responseMessage = res;
+      enqueueSnackbar(responseMessage.Message, { variant: 'success' });
+      refetch();
+    })
+    setEditInvoice(null)
+    setEditOpen(false)
+  }
+
   const invoiceForm = [
     {
       label: 'Invoice Number',
@@ -250,7 +279,34 @@ export default function Invoice() {
         submitText={'update invoice'}
         cancelText={'cancel'}
         formData={invoiceForm}
-      />
+      >
+        <Grid item xs={6} >
+          <Autocomplete
+            value={editInvoice?.OperationNumber}
+            onChange={(event, newValue) => {
+              setNewOperation(newValue);
+            }}
+            disablePortal
+            id="combo-box-demo"
+            options={operations}
+            sx={{ pt: 2 }}
+            renderInput={(params) => <TextField {...params} required label="operations" />}
+          />
+        </Grid>
+        <Grid item xs={6} >
+          <Autocomplete
+            value={editInvoice?.CustomerName}
+            onChange={(event, newValue) => {
+              setNewCustomer(newValue);
+            }}
+            disablePortal
+            id="combo-box-demo"
+            options={customers}
+            sx={{ pt: 2 }}
+            renderInput={(params) => <TextField {...params} required label="customers" />}
+          />
+        </Grid>
+      </CustomeDialog>
     </Paper>
   );
 }

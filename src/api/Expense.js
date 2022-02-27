@@ -14,6 +14,19 @@ export async function getExpense(token, id) {
     return data;
 }
 
+export async function  getExpenseList(token) {
+    const response = await fetch(`${API_BASE}/expenselist`, {
+        method: 'GET',
+        headers: {
+            "Accept": "*/*",
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        },
+    });
+    const data = await response.json();
+    return data;
+}
+
 // create expense
 export async function createExpense(expense, token) {
     try {

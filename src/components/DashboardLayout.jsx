@@ -31,6 +31,8 @@ import { LogoutOutlined } from "@mui/icons-material";
 import { useToggleTheme } from "../theme/useTheme";
 import GlitterLogo from "../assets/glitter-logo.jpg";
 import { getCurrenUser } from "../api/auth";
+import { useQuery } from "react-query";
+import Loading from "../components/Loading";
 
 const drawerWidth = 240;
 
@@ -133,15 +135,21 @@ export default function DashboardLayout() {
     setAnchorElUser(null);
   };
 
-
+  const { isLoading, error, data, refetch } = useQuery('current user', () =>
+    getCurrenUser(localStorage.getItem('token')).then((res) => res)
+  )
 
   React.useEffect(() => {
-    getCurrenUser(localStorage.getItem('token')).then((res) => {
-      setCurrentUser(res);
-    });
-  }, []);
+    if (data) {
+      setCurrentUser(data)
+    }
+  }, [data]);
 
   console.log("CURRENT USER", currentUser)
+
+  if (isLoading) return <Loading />
+
+  if(error) return <div>Error `${error.message}`</div>
 
   return (
     <Box sx={{ display: "flex" }}>
@@ -199,7 +207,7 @@ export default function DashboardLayout() {
             >
               <Box alignItems={"center"}>
                 <MenuItem>
-                  <Avatar src={`R`} sx={{ mr: 1 }} />
+                  <Avatar src={`${currentUser?.UserImagePath}`} sx={{ mr: 1 }} />
                   <Typography color="GrayText">
                     <b>{currentUser?.UserName}</b> <br />
                   </Typography>
@@ -213,7 +221,7 @@ export default function DashboardLayout() {
                     handleCloseUserMenu();
                     localStorage.removeItem("token");
                     navigate('/')
-                   }}
+                  }}
                 >
                   <LogoutOutlined sx={{ mr: 2 }} />
                   <Typography textAlign="center" sx={{ textTransform: "none" }}>
@@ -235,9 +243,19 @@ export default function DashboardLayout() {
           },
         }}
       >
-        <DrawerHeader></DrawerHeader>
+        <DrawerHeader>{isLoading && 'loadinngg...'}</DrawerHeader>
         <List>
-          {navList.map((navItem, index) => (
+          {currentUser?.UserRole === 'Administrator' ? navList.map((navItem, index) => (
+            <ListItem
+              button
+              component={Link}
+              to={navItem.path}
+              key={navItem.path}
+            >
+              <ListItemIcon>{navItem.icon}</ListItemIcon>
+              <ListItemText primary={navItem.title} />
+            </ListItem>
+          )) : navList.filter(navItem => navItem.title === 'user').map((navItem, index) => (
             <ListItem
               button
               component={Link}

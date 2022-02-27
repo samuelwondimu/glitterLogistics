@@ -2,7 +2,7 @@ import { API_BASE } from "./base";
 
 // get commodity
 export async function getCommodity(token, id) {
-    const response = await fetch(`${API_BASE}/commodity`, {
+    const response = await fetch(`${API_BASE}/commodity/active`, {
         method: 'GET',
         headers: {
             "Accept": "*/*",
@@ -69,7 +69,7 @@ export async function deleteCommodity(token, id) {
 }
 
 // update deactivate commodity
-export async function updateDeactivate(token, id) {
+export async function updateConfirmDelete(token, id) {
     const response = await fetch(`${API_BASE}/commodity/deactivate/${id}`, {
         method: 'PUT',
         headers: {

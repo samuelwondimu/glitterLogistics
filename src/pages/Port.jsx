@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from "react";
 import {
   Button,
+  Dialog,
+  DialogActions,
+  DialogTitle,
   Paper,
   Typography,
 } from "@mui/material";
@@ -11,13 +14,21 @@ import {
   EditOutlined,
 } from "@mui/icons-material";
 import { useQuery } from "react-query";
-import { createPort, deletePort, getPorts, updatePorts } from "../api/port";
+import { createPort, deletePort, getPorts, updatePortDelete, updatePorts } from "../api/port";
 import { useSnackbar } from "notistack";
 import CustomeDialog from '../components/CustomDialog'
 
 export default function Port() {
   const { enqueueSnackbar } = useSnackbar();
   const [portData, setPortData] = useState([]);
+
+  // handle delete modal
+  const [deleteMessage, setDeleteMessage] = useState('')
+  const [deletePortdata, setDeletePortdata] = useState(null)
+  const [openDelete, setOpenDelete] = React.useState(false);
+  const handleDeleteOpen = () => setOpenDelete(true);
+  const handleDeleteClose = () => setOpenDelete(false);
+
 
   // handle edit modal
   const [editOpen, setEditOpen] = useState(false);
@@ -62,14 +73,16 @@ export default function Port() {
         }
 
         async function deleteRow() {
-          await deletePort(localStorage.getItem("token"), params.row.id).then((res) => {
+          const rowData = params.row;
+          await deletePort(localStorage.getItem("token"), params.row.PortID).then((res) => {
             const responseMessage = res
             if (responseMessage.ID === 2) {
-              alert("Port deleted successfully")
+              setDeletePortdata(rowData);
+              handleDeleteOpen();
+              setDeleteMessage(responseMessage.Message)
             } else if (responseMessage.ID === 0) {
-              refetch()
               enqueueSnackbar(responseMessage.Message, { variant: "error" });
-              setPortData(portData.filter((item) => item.id !== params.row.id));
+              refetch();
             }
           });
         }
@@ -127,7 +140,7 @@ export default function Port() {
     const data = new FormData(event.currentTarget);
 
     const port = {
-      PortID: editPort.id,
+      PortID: editPort.PortID,
       PortName: data.get("PortName"),
       Country: data.get("Country"),
     };
@@ -139,10 +152,20 @@ export default function Port() {
     });
   };
 
+  async function handleDelete() {
+    console.log(deletePortdata)
+    await updatePortDelete(localStorage.getItem("token"), deletePortdata?.PortID).then((res) => {
+      const responseMessage = res
+      enqueueSnackbar(responseMessage.Message);
+    })
+    setOpenDelete(false);
+    refetch();
+  }
+
   useEffect(() => {
     console.log(data)
     if (data) {
-      setPortData(data.map((port) => ({ id: port.PortID, PortName: port.PortName, Country: port.Country })));
+      setPortData(data.map((port, i) => ({ id: i, PortID: port.PortID, PortName: port.PortName, Country: port.Country })));
     }
   }, [data]);
 
@@ -220,6 +243,16 @@ export default function Port() {
         cancelText={'cancel'}
         formData={portForm}
       />
+      {/* delete */}
+      <Dialog onClose={handleDeleteClose} open={openDelete}>
+        <DialogTitle >
+          {deleteMessage}
+        </DialogTitle>
+        <DialogActions>
+          <Button variant='contained' sx={{ mr: 2 }} onClick={handleDelete}>yes</Button>
+          <Button variant='contained' onClick={handleDeleteClose}>no</Button>
+        </DialogActions>
+      </Dialog>
     </Paper>
   );
 }

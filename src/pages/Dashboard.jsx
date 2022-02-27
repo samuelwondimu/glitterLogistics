@@ -1,7 +1,8 @@
 import {
+  Add as AddIcon,
+  Anchor,
   Delete,
   Done,
-  Folder,
   Inventory2,
   PaidOutlined,
   PeopleAltOutlined,
@@ -9,6 +10,7 @@ import {
   Settings,
   SettingsAccessibility,
 } from "@mui/icons-material";
+import { DesktopDatePicker } from "@mui/lab";
 import {
   Box,
   Button,
@@ -17,17 +19,13 @@ import {
   CardMedia,
   Collapse,
   Divider,
-  FormControl,
   Grid,
   IconButton,
-  InputLabel,
   List,
   ListItem,
   ListItemAvatar,
   ListItemText,
-  MenuItem,
   Paper,
-  Select,
   Stack,
   Table,
   TableBody,
@@ -36,13 +34,20 @@ import {
   TableContainer,
   TableHead,
   TableRow,
+  TextField,
   Typography,
 } from "@mui/material";
 import { styled } from "@mui/material";
+import { useSnackbar } from "notistack";
 import React, { useEffect, useState } from "react";
+import { useQuery } from "react-query";
 import { getCurrenUser } from "../api/auth";
+import { getCustomers } from "../api/customers";
+import { getOperations } from "../api/operation";
 import { getReports } from "../api/report";
-import { getTodos } from "../api/todo";
+import { getServceProvider } from "../api/serviceprovider";
+import { createTodoapi, getTodos, updateTodoapi } from "../api/todo";
+import CustomeDialog from "../components/CustomDialog";
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.head}`]: {
@@ -66,9 +71,19 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
 
 export default function Dashboard() {
   const [user, setUser] = useState(null);
+  const { enqueueSnackbar } = useSnackbar();
   const [reports, setReports] = useState(null);
   const [todos, setTodos] = useState(null);
   const [expanded, setExpanded] = React.useState(false);
+  const [createTodo, setCreateTodo] = useState(false);
+  const [operations, setOperations] = useState(null);
+  const [customers, setCustomers] = useState(null);
+  const [serviceProviders, setServiceProviders] = useState(null);
+  const [startDate, setStartDate] = useState(null);
+  const [dueDate, setDueDate] = useState(null);
+
+  const handleCreateOpen = () => setCreateTodo(true);
+  const handleCreateClose = () => setCreateTodo(false);
 
   const handleExpandClick = () => {
     setExpanded(!expanded);
@@ -78,7 +93,7 @@ export default function Dashboard() {
     {
       title: "Operations",
       data: reports?.Operation,
-      icon: <Settings fontSize="large" sx={{ background: 'orange', color: 'white', p: 0.5, borderRadius: 1 }} />,
+      icon: <Settings fontSize="large" sx={{ background: 'gray', color: 'white', p: 0.5, borderRadius: 1 }} />,
     },
     {
       title: "Customers",
@@ -88,51 +103,38 @@ export default function Dashboard() {
     {
       title: 'Service Provider',
       data: reports?.ServiceProvider,
-      icon: <SettingsAccessibility fontSize="large" sx={{ background: 'orange', color: 'white', p: 0.5, borderRadius: 1 }} />,
+      icon: <SettingsAccessibility fontSize="large" sx={{ background: 'blue', color: 'white', p: 0.5, borderRadius: 1 }} />,
     },
     {
       title: "Invoices",
       data: reports?.Invoice,
-      icon: <Receipt fontSize="large" sx={{ background: 'orange', color: 'white', p: 0.5, borderRadius: 1 }} />
+      icon: <Receipt fontSize="large" sx={{ background: 'red', color: 'white', p: 0.5, borderRadius: 1 }} />
     }
-
-
   ];
 
   const topcardCollapsed = [
     {
       title: "Ports",
       data: reports?.Ports,
-      icon: <Folder fontSize="large" sx={{ background: 'orange', color: 'white', p: 0.5, borderRadius: 1 }} />,
+      icon: <Anchor fontSize="large" sx={{ background: 'pink', color: 'white', p: 0.5, borderRadius: 1 }} />,
     },
     {
       title: "Expenses",
       data: reports?.Expense,
-      icon: <PaidOutlined fontSize="large" sx={{ background: 'orange', color: 'white', p: 0.5, borderRadius: 1 }} />,
+      icon: <PaidOutlined fontSize="large" sx={{ background: 'green', color: 'white', p: 0.5, borderRadius: 1 }} />,
     },
     {
       title: "Commoditys",
       data: reports?.Commodity,
-      icon: <Inventory2 fontSize="large" sx={{ background: 'orange', color: 'white', p: 0.5, borderRadius: 1 }} />,
+      icon: <Inventory2 fontSize="large" sx={{ background: 'purple', color: 'white', p: 0.5, borderRadius: 1 }} />,
     },
     {
       title: "Cash Collection",
       data: reports?.CashCollection,
-      icon: <Done fontSize="large" sx={{ background: 'orange', color: 'white', p: 0.5, borderRadius: 1 }} />,
+      icon: <Done fontSize="large" sx={{ background: 'teal', color: 'white', p: 0.5, borderRadius: 1 }} />,
     },
   ]
 
-  function createData(name, calories, fat, carbs, protein) {
-    return { name, calories, fat, carbs, protein };
-  }
-
-  const rows = [
-    createData("#123123", 159, 6.0, 24, 4.0),
-    createData("#4324321", 237, 9.0, 37, 4.3),
-    createData("#2412431", 262, 16.0, 24, 6.0),
-    createData("#4412412", 305, 3.7, 67, 4.3),
-    createData("#5234232", 356, 16.0, 49, 3.9),
-  ];
   useEffect(() => {
     const token = localStorage.getItem("token");
     getCurrenUser(token).then((res) => {
@@ -140,19 +142,49 @@ export default function Dashboard() {
     });
 
     getReports(token).then((res) => {
-      console.log(res);
       setReports(res[0]);
     });
 
     getTodos(token).then((res) => {
-      console.log(res);
       setTodos(res);
     });
   }, [])
 
-  console.log("CURRENT USER", user);
-  console.log("REPORTS", reports);
-  console.log("TODOS", todos);
+  useEffect(() => {
+    getOperations(localStorage.getItem('token')).then((res) => res).then(res => {
+      setOperations(res);
+    });
+    getCustomers(localStorage.getItem("token")).then((res) => res).then((res) => {
+      setCustomers(res);
+    });
+    getServceProvider(localStorage.getItem("token")).then((res) => res).then((res) => {
+      setServiceProviders(res);
+    })
+  }, []);
+
+  async function handleCreatetodo(event) {
+    event.preventDefault();
+    const token = localStorage.getItem("token");
+    const data = {
+      Subject: event.target.Subject.value,
+      Notes: event.target.Notes.value,
+      dueDate: dueDate,
+      startDate: startDate,
+      Status: 'Active',
+    };
+    console.log(data);
+    await createTodoapi(data, token).then(res => {
+      console.log(res);
+      enqueueSnackbar("Todo Created", { variant: "success" });
+      handleCreateClose();
+    })
+    getTodos(token).then((res) => {
+      setTodos(res);
+    });
+    setStartDate(null);
+    setDueDate(null);
+    setCreateTodo(false);
+  }
 
   return (
     <div>
@@ -176,7 +208,7 @@ export default function Dashboard() {
                     <Typography variant="h4">{data.data}</Typography>
                   </CardContent>
                   <CardMedia>
-                    <Box mr={4}>{data.icon}</Box>
+                    <Box mr={4} >{data.icon}</Box>
                   </CardMedia>
                 </Card>
               </Grid>
@@ -225,30 +257,30 @@ export default function Dashboard() {
               <Table aria-label="simple table">
                 <TableHead>
                   <TableRow>
-                    <StyledTableCell>Opp. No</StyledTableCell>
-                    <StyledTableCell align="right">Date</StyledTableCell>
-                    <StyledTableCell align="right">Customer ID</StyledTableCell>
-                    <StyledTableCell align="right">
+                    <StyledTableCell>Operation Type</StyledTableCell>
+                    <StyledTableCell >
                       Customer Name
                     </StyledTableCell>
-                    <StyledTableCell align="right">Balance</StyledTableCell>
+                    <StyledTableCell >Load Port Name</StyledTableCell>
+                    <StyledTableCell >Discharge Port Name</StyledTableCell>
+                    <StyledTableCell >Remark</StyledTableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {rows.map((row) => (
-                    <StyledTableRow key={row.name}>
+                  {operations?.slice(0, 5).map((row, i) => (
+                    <StyledTableRow key={i}>
                       <StyledTableCell component="th" scope="row">
-                        {row.name}
+                        {row.OperationType}
                       </StyledTableCell>
-                      <StyledTableCell align="right">
-                        {row.calories}
+                      <StyledTableCell >
+                        {row.CustomerName}
                       </StyledTableCell>
-                      <StyledTableCell align="right">{row.fat}</StyledTableCell>
-                      <StyledTableCell align="right">
-                        {row.carbs}
+                      <StyledTableCell >{row.LoadPortName}</StyledTableCell>
+                      <StyledTableCell >
+                        {row.DischargePortName}
                       </StyledTableCell>
-                      <StyledTableCell align="right">
-                        {row.protein}
+                      <StyledTableCell >
+                        {row.Remark}
                       </StyledTableCell>
                     </StyledTableRow>
                   ))}
@@ -266,30 +298,30 @@ export default function Dashboard() {
               <Table aria-label="simple table">
                 <TableHead>
                   <TableRow>
-                    <StyledTableCell>Opp. No</StyledTableCell>
-                    <StyledTableCell align="right">Date</StyledTableCell>
-                    <StyledTableCell align="right">Customer ID</StyledTableCell>
-                    <StyledTableCell align="right">
-                      Customer Name
+                    <StyledTableCell>Customer Type</StyledTableCell>
+                    <StyledTableCell >Customer Name</StyledTableCell>
+                    <StyledTableCell >Address</StyledTableCell>
+                    <StyledTableCell >
+                      Mobile
                     </StyledTableCell>
-                    <StyledTableCell align="right">Balance</StyledTableCell>
+                    <StyledTableCell >VATRegNo</StyledTableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {rows.map((row) => (
-                    <StyledTableRow key={row.name}>
+                  {customers?.map((row, i) => (
+                    <StyledTableRow key={i}>
                       <StyledTableCell component="th" scope="row">
-                        {row.name}
+                        {row.CustomerType}
                       </StyledTableCell>
-                      <StyledTableCell align="right">
-                        {row.calories}
+                      <StyledTableCell >
+                        {row.CustomerName}
                       </StyledTableCell>
-                      <StyledTableCell align="right">{row.fat}</StyledTableCell>
-                      <StyledTableCell align="right">
-                        {row.carbs}
+                      <StyledTableCell >{row.Address}</StyledTableCell>
+                      <StyledTableCell >
+                        {row.Mobile}
                       </StyledTableCell>
-                      <StyledTableCell align="right">
-                        {row.protein}
+                      <StyledTableCell >
+                        {row.VATRegNo}
                       </StyledTableCell>
                     </StyledTableRow>
                   ))}
@@ -307,30 +339,30 @@ export default function Dashboard() {
               <Table aria-label="simple table">
                 <TableHead>
                   <TableRow>
-                    <StyledTableCell>Opp. No</StyledTableCell>
-                    <StyledTableCell align="right">Date</StyledTableCell>
-                    <StyledTableCell align="right">Customer ID</StyledTableCell>
-                    <StyledTableCell align="right">
-                      Customer Name
+                    <StyledTableCell>Service Provider Name</StyledTableCell>
+                    <StyledTableCell >Service Type</StyledTableCell>
+                    <StyledTableCell >Mobile</StyledTableCell>
+                    <StyledTableCell >
+                      Address
                     </StyledTableCell>
-                    <StyledTableCell align="right">Balance</StyledTableCell>
+                    <StyledTableCell >VAT Reg No</StyledTableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {rows.map((row) => (
-                    <StyledTableRow key={row.name}>
+                  {serviceProviders?.map((row, i) => (
+                    <StyledTableRow key={i}>
                       <StyledTableCell component="th" scope="row">
-                        {row.name}
+                        {row.ServiceProviderName}
                       </StyledTableCell>
-                      <StyledTableCell align="right">
-                        {row.calories}
+                      <StyledTableCell >
+                        {row.ServiceType}
                       </StyledTableCell>
-                      <StyledTableCell align="right">{row.fat}</StyledTableCell>
-                      <StyledTableCell align="right">
-                        {row.carbs}
+                      <StyledTableCell >{row.Mobile}</StyledTableCell>
+                      <StyledTableCell >
+                        {row.Address}
                       </StyledTableCell>
-                      <StyledTableCell align="right">
-                        {row.protein}
+                      <StyledTableCell >
+                        {row.VATRegNo}
                       </StyledTableCell>
                     </StyledTableRow>
                   ))}
@@ -345,20 +377,7 @@ export default function Dashboard() {
               <Typography gutterBottom variant="h6" component="h2">
                 Todo List
               </Typography>
-              <FormControl sx={{ width: 2 / 4 }}>
-                <InputLabel id="demo-simple-select-label">Sort</InputLabel>
-                <Select
-                  labelId="demo-simple-select-label"
-                  id="demo-simple-select"
-                  // value={sort}
-                  label="TODO"
-                // onChange={handleChange}
-                >
-                  <MenuItem value={10}>Task</MenuItem>
-                  <MenuItem value={20}>Appointement</MenuItem>
-                  <MenuItem value={30}>Phone Call</MenuItem>
-                </Select>
-              </FormControl>
+              <Button startIcon={<AddIcon />} variant='contained' onClick={handleCreateOpen}>Add Todo</Button>
             </Stack>
             <List dense>
               {todos?.map((list, i) => {
@@ -375,21 +394,31 @@ export default function Dashboard() {
                       <IconButton
                         edge="end"
                         aria-label="delete"
+                        varient='contained'
+                        color='success'
                         sx={{
                           mr: 1,
-                          backgroundColor: "green",
-                          color: "white",
+                        }}
+                        onClick={async () => {
+                          await updateTodoapi(localStorage.getItem('token'), list.TaskID);
+                          await getTodos(localStorage.getItem('token')).then((res) => {
+                            console.log(res);
+                            setTodos(res);
+                          });
+                          getTodos(localStorage.getItem('token')).then((res) => {
+                            setTodos(res);
+                          });
                         }}
                       >
                         <Done />
                       </IconButton>
-                      <IconButton
+                      {/* <IconButton
                         edge="end"
                         aria-label="delete"
                         sx={{ backgroundColor: "red", color: "white" }}
                       >
                         <Delete />
-                      </IconButton>
+                      </IconButton> */}
                     </ListItemAvatar>
                     <Divider sx={{ my: 1 }} />
                   </ListItem>
@@ -399,6 +428,46 @@ export default function Dashboard() {
           </Paper>
         </Grid>
       </Grid>
+      <CustomeDialog
+        open={createTodo}
+        handleClose={handleCreateClose}
+        handleSubmit={handleCreatetodo}
+        title={'Create Todo'}
+        submitText={'create todo'}
+        cancelText={'cancel'}
+        formData={[
+
+        ]}
+      >
+        <Box />
+        {/* date picker */}
+        <Grid item xs={6} >
+          <DesktopDatePicker
+            sx={{ pt: 4 }}
+            label="start date"
+            inputFormat="MM/dd/yyyy"
+            value={startDate}
+            onChange={(value) => setStartDate(value)}
+            renderInput={(params) => <TextField {...params} />}
+          />
+        </Grid>
+        <Grid item xs={6} >
+          <DesktopDatePicker
+            sx={{ pt: 4 }}
+            label="due date"
+            inputFormat="MM/dd/yyyy"
+            value={dueDate}
+            onChange={(value) => setDueDate(value)}
+            renderInput={(params) => <TextField {...params} />}
+          />
+        </Grid>
+        <Grid item xs={12}>
+          <TextField margin='normal' required fullWidth label={'Subject'} name={"Subject"} />
+        </Grid>
+        <Grid item xs={12}>
+          <TextField margin='normal' required fullWidth multiline rows={4} label={'Notes'} name={'Notes'} />
+        </Grid>
+      </CustomeDialog>
     </div>
   );
 }

@@ -1,4 +1,5 @@
 import React from 'react';
+import AdapterDateFns from '@mui/lab/AdapterDateFns';
 import { QueryClient, QueryClientProvider } from 'react-query'
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import { SnackbarProvider } from 'notistack';
@@ -14,12 +15,14 @@ import Operations from './pages/Operations';
 import { ThemeContext } from './theme/useTheme';
 import ServiceProvider from './pages/ServiceProvider';
 import Users from './pages/Users';
+import { LocalizationProvider } from '@mui/lab';
 
 const queryClient = new QueryClient()
 
 export default function App() {
   return <>
     <AuthProvider>
+    <LocalizationProvider dateAdapter={AdapterDateFns}>
       <SnackbarProvider maxSnack={3}>
         <QueryClientProvider client={queryClient}>
           <ThemeContext>
@@ -36,13 +39,14 @@ export default function App() {
                   <Route path='invoice' element={<Invoice />} />
                   <Route path='operations' element={<Operations />} />
                   <Route path='service-provider' element={<ServiceProvider />} />
-                  <Route path='users' elemenet={<Users />} />
+                  <Route path='users' element={<Users />} />
                 </Route>
               </Routes>
             </BrowserRouter>
           </ThemeContext>
         </QueryClientProvider>
       </SnackbarProvider>
+      </LocalizationProvider>
     </AuthProvider>
   </>;
 }

@@ -1,16 +1,14 @@
 import { API_BASE } from "./base";
 
-
-// create ports
-export async function createPort(port, token) {
+export async function createServiceProvider(serviceProvider, token) {
     try {
-        const response = await fetch(`${API_BASE}/port`, {
+        const response = await fetch(`${API_BASE}/serviceprovider`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${token}`
             },
-            body: JSON.stringify(port)
+            body: JSON.stringify(serviceProvider)
         });
         const data = await response.json();
         return data;
@@ -19,9 +17,8 @@ export async function createPort(port, token) {
     }
 }
 
-// get ports
-export async function getPorts(token) {
-    const response = await fetch(`${API_BASE}/port/active`, {
+export async function getServceProvider(token) {
+    const response = await fetch(`${API_BASE}/serviceprovider/`, {
         method: 'GET',
         headers: {
             "Accept": "*/*",
@@ -33,17 +30,16 @@ export async function getPorts(token) {
     return data;
 }
 
-// update ports
-export async function updatePorts(token, portData) {
+export async function editServiceProvider(token, serviceData) {
     try {
-        const response = await fetch(`${API_BASE}/port`, {
+        const response = await fetch(`${API_BASE}/serviceprovider`, {
             method: 'PUT',
             headers: {
                 "Accept": "*/*",
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${token}`
             },
-            body: JSON.stringify(portData)
+            body: JSON.stringify(serviceData)
         });
         const data = await response.json();
         return data;
@@ -52,10 +48,9 @@ export async function updatePorts(token, portData) {
     }
 }
 
-// delete ports
-export async function deletePort(token, id) {
+export async function deleteServiceProvider(token, id) {
     try {
-        const response = await fetch(`${API_BASE}/port/${id}`, {
+        const response = await fetch(`${API_BASE}/serviceprovider/${id}`, {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json',
@@ -67,16 +62,4 @@ export async function deletePort(token, id) {
     } catch (error) {
         console.error('Error:', error);
     }
-}
-
-// update deactive ports
-export async function updatePortDelete(token, id) {
-    const response = await fetch(`${API_BASE}/port/deactivate/${id}`, {
-        method: 'PUT',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-        },
-    });
-    return await response.json();
 }
