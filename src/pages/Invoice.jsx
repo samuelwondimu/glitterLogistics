@@ -200,11 +200,13 @@ export default function Invoice() {
     {
       label: 'Invoice Number',
       name: 'InvoiceNo',
+      type: 'numeric',
       defaultValue: editInvoice ? editInvoice.InvoiceNo : '',
     },
     {
       label: 'Invoice Amount',
       name: 'InvoiceAmount',
+      type: 'numeric',
       defaultValue: editInvoice ? editInvoice.InvoiceAmount : '',
     },
     {

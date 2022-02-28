@@ -124,6 +124,7 @@ export default function Expense() {
     {
       label: "ExpenseAmount",
       name: 'ExpenseAmount',
+      type: 'numeric',
       defaultValue: editExpense ? editExpense?.Amount : ''
     },
     {

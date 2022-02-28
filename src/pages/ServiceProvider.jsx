@@ -233,12 +233,14 @@ export default function ServiceProvider() {
     {
       label: "Telephone2",
       name: "Telephone2",
+      type: 'numeric',
       defaultValue: editServiceData ? editServiceData.Telephone2 : "",
 
     },
     {
       label: "Mobile",
       name: "Mobile",
+      type: 'numeric',
       defaultValue: editServiceData ? editServiceData.Mobile : "",
 
     },
@@ -250,11 +252,13 @@ export default function ServiceProvider() {
     {
       label: "VAT Reg No",
       name: "VATRegNo",
+      type: 'numeric',
       defaultValue: editServiceData ? editServiceData.VATRegNo : "",
     },
     {
       label: "TIN No",
       name: "TINNo",
+      type: 'numeric',
       defaultValue: editServiceData ? editServiceData.TINNo : "",
     },
   ]

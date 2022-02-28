@@ -22,30 +22,30 @@ const queryClient = new QueryClient()
 export default function App() {
   return <>
     <AuthProvider>
-    <LocalizationProvider dateAdapter={AdapterDateFns}>
-      <SnackbarProvider maxSnack={3}>
-        <QueryClientProvider client={queryClient}>
-          <ThemeContext>
-            <BrowserRouter>
-              <Routes>
-                <Route path="/" element={<Login />} />
-                <Route path="/dashboard" element={<DashboardLayout />} >
-                  {/* dashboard protected route components goes here */}
-                  <Route path='' element={<Dashboard />} />
-                  <Route path='commodity' element={<Commodity />} />
-                  <Route path='customers' element={<Customer />} />
-                  <Route path='expense' element={<Expense />} />
-                  <Route path='port' element={<Port />} />
-                  <Route path='invoice' element={<Invoice />} />
-                  <Route path='operations' element={<Operations />} />
-                  <Route path='service-provider' element={<ServiceProvider />} />
-                  <Route path='users' element={<Users />} />
-                </Route>
-              </Routes>
-            </BrowserRouter>
-          </ThemeContext>
-        </QueryClientProvider>
-      </SnackbarProvider>
+      <LocalizationProvider dateAdapter={AdapterDateFns}>
+        <SnackbarProvider maxSnack={3}>
+          <QueryClientProvider client={queryClient}>
+            <ThemeContext>
+              <BrowserRouter>
+                <Routes>
+                  <Route path="/" element={<Login />} />
+                  <Route path="/dashboard" element={<DashboardLayout />} >
+                    {/* dashboard protected route components goes here */}
+                    <Route path='' element={<Dashboard />} />
+                    <Route path='commodity' element={<Commodity />} />
+                    <Route path='customers' element={<Customer />} />
+                    <Route path='expense' element={<Expense />} />
+                    <Route path='port' element={<Port />} />
+                    <Route path='invoice' element={<Invoice />} />
+                    <Route path='operations' element={<Operations />} />
+                    <Route path='service-provider' element={<ServiceProvider />} />
+                    <Route path='users' element={<Users />} />
+                  </Route>
+                </Routes>
+              </BrowserRouter>
+            </ThemeContext>
+          </QueryClientProvider>
+        </SnackbarProvider>
       </LocalizationProvider>
     </AuthProvider>
   </>;
@@ -56,21 +56,7 @@ let AuthContext = React.createContext(null);
 function AuthProvider({ children }) {
   let [user, setUser] = React.useState(null);
 
-  let signin = (user, callback) => {
-    setUser(user);
-    console.log(user)
-    return callback();
-  };
-
-  let signout = (callback) => {
-    setUser(null);
-    return callback();
-  };
-
-  let value = { user, signin, signout };
-
-
-
+  let value = { user, setUser };
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 

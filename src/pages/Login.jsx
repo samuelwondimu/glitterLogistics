@@ -42,7 +42,9 @@ export default function SignInSide() {
         event.preventDefault();
         const data = new FormData(event.currentTarget);
         login(data.get('email'), data.get('password'))
-        navigate(from, { replace: true });
+        if (localStorage.getItem('token')) {
+            navigate(from, { replace: true });
+        }
     };
 
     return (
@@ -100,8 +102,9 @@ export default function SignInSide() {
                                 required
                                 fullWidth
                                 id="email"
-                                label="Email Address"
+                                label="User Name"
                                 name="email"
+                                type
                                 autoComplete="email"
                                 autoFocus
                             />

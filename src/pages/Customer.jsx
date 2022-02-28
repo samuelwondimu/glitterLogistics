@@ -80,16 +80,20 @@ export default function Customer() {
       field: "VATRegNo",
       headerName: "VAT No",
       width: 100,
+
     },
     {
       field: "Email",
       headerName: "Email",
       width: 150,
+
     },
     {
       field: "TINNo",
       headerName: "TIN No",
       width: 150,
+      type: "numeric",
+      pattern: '[0-9]*',
     },
     {
       field: "createdAt",
@@ -227,16 +231,20 @@ export default function Customer() {
     {
       label: 'Telephone1',
       name: 'Telephone1',
+      type: 'numeric',
+      pattern: '[0-9]*',
       defaultValue: editCustomer ? editCustomer?.Telephone1 : ''
     },
     {
       label: 'Mobile',
       name: 'Mobile',
+      type: 'numeric',
       defaultValue: editCustomer ? editCustomer?.Mobile : ''
     },
     {
       label: 'VAT Reg No',
       name: 'VATRegNo',
+      type: 'numeric',
       defaultValue: editCustomer ? editCustomer?.VATRegNo : ''
     },
     {
@@ -247,6 +255,7 @@ export default function Customer() {
     {
       label: 'TIN No',
       name: 'TINNo',
+      type: 'numeric',
       defaultValue: editCustomer ? editCustomer?.TINNo : ''
     },
   ]

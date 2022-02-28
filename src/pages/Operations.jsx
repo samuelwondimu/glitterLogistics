@@ -240,6 +240,7 @@ export default function Operations() {
     {
       label: 'Operation Number',
       name: 'OperationNumber',
+      type: 'numeric',
       defaultValue: editOprationData ? editOprationData.OperationNumber : '',
     },
     {

@@ -17,6 +17,11 @@ export function login(username, password) {
             localStorage.setItem("token", data);
             const token = localStorage.getItem("token");
             console.log("TOKEN", token);
+            getCurrenUser(localStorage.getItem("token")).then(data => {
+                console.log("USER", data);
+                localStorage.setItem("user", JSON.stringify(data));
+                window.location.href = "/dashboard";
+            });
         }
         return data;
     });

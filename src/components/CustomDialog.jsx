@@ -11,8 +11,8 @@ export default function CustomeDialog({
     cancelText,
     formData,
     type,
+    pattern,
     ...props
-
 }) {
     return (
         <Dialog onClose={handleClose} aria-labelledby="customized-dialog-title" open={open}>
@@ -24,7 +24,11 @@ export default function CustomeDialog({
                     {formData.map((data, i) => {
                         return (
                             <Grid item xs={6} key={i}>
-                                <TextField margin='normal' required fullWidth label={data.label} name={data.name} defaultValue={data.defaultValue} />
+                                {data.type ? (
+                                    <TextField margin='normal' required fullWidth label={data.label} inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }} name={data.name} defaultValue={data.defaultValue} />
+                                ) : (
+                                    <TextField margin='normal' required fullWidth label={data.label} name={data.name} defaultValue={data.defaultValue} />
+                                )}
                             </Grid>
                         )
                     })}

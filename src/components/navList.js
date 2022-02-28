@@ -50,9 +50,5 @@ export const navList = [
     path: "service-provider",
     icon: <Inventory2 />,
   },
-  {
-    title: "Users",
-    path: "users",
-    icon: <PeopleAlt />,
-  }
+
 ];

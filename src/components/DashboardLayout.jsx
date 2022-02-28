@@ -27,7 +27,7 @@ import {
   Tooltip,
   useTheme,
 } from "@mui/material";
-import { LogoutOutlined } from "@mui/icons-material";
+import { LogoutOutlined, PeopleAlt } from "@mui/icons-material";
 import { useToggleTheme } from "../theme/useTheme";
 import GlitterLogo from "../assets/glitter-logo.jpg";
 import { getCurrenUser } from "../api/auth";
@@ -140,16 +140,15 @@ export default function DashboardLayout() {
   )
 
   React.useEffect(() => {
-    if (data) {
-      setCurrentUser(data)
-    }
-  }, [data]);
+    localStorage.getItem('user') && setCurrentUser(JSON.parse(localStorage.getItem('user')))
+  }, []);
 
   console.log("CURRENT USER", currentUser)
 
+  console.log("CURRENT USER", currentUser)
   if (isLoading) return <Loading />
 
-  if(error) return <div>Error `${error.message}`</div>
+  if (error) return <div>Error `${error.message}`</div>
 
   return (
     <Box sx={{ display: "flex" }}>
@@ -245,17 +244,7 @@ export default function DashboardLayout() {
       >
         <DrawerHeader>{isLoading && 'loadinngg...'}</DrawerHeader>
         <List>
-          {currentUser?.UserRole === 'Administrator' ? navList.map((navItem, index) => (
-            <ListItem
-              button
-              component={Link}
-              to={navItem.path}
-              key={navItem.path}
-            >
-              <ListItemIcon>{navItem.icon}</ListItemIcon>
-              <ListItemText primary={navItem.title} />
-            </ListItem>
-          )) : navList.filter(navItem => navItem.title === 'user').map((navItem, index) => (
+          {navList.map((navItem, index) => (
             <ListItem
               button
               component={Link}
@@ -266,6 +255,16 @@ export default function DashboardLayout() {
               <ListItemText primary={navItem.title} />
             </ListItem>
           ))}
+          {currentUser?.UserRole === 'Administrator' && (
+            <ListItem
+              button
+              component={Link}
+              to={'/dashboard/users'}
+            >
+              <ListItemIcon>{<PeopleAlt />}</ListItemIcon>
+              <ListItemText primary={'Users'} />
+            </ListItem>
+          )}
         </List>
       </Drawer>
       <Box

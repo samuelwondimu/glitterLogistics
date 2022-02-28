@@ -120,6 +120,7 @@ export default function Commodity() {
     {
       label: 'HS Code',
       name: 'HsCode',
+      type: 'numeric',
       defaultValue: editCommodity ? editCommodity?.HSCode : ''
     }
   ]
